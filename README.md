@@ -91,4 +91,4 @@ python build.py
 
 ---
 
-**Разработано для самых маленьких форума [Talk 24Serv](https://talk.24serv.pro/)**
+**Разработано для самых маленьких, форума [Talk 24Serv](https://talk.24serv.pro/)**
