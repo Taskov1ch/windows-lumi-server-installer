@@ -1,16 +1,62 @@
 import subprocess
 import re
+import os
 from typing import Optional, Tuple
 
 class JavaUtils:
 	@staticmethod
-	def check_java_version() -> Tuple[bool, Optional[str], Optional[int]]:
+	def _find_java_executable() -> Optional[str]:
 		try:
 			result = subprocess.run(
-				['java', '-version'],
+				['where', 'java'],
 				capture_output=True,
 				text=True,
-				timeout=10
+				check=True,
+				timeout=5,
+				creationflags=subprocess.CREATE_NO_WINDOW
+			)
+			return result.stdout.strip().split('\n')[0]
+		except (subprocess.CalledProcessError, FileNotFoundError, subprocess.TimeoutExpired):
+			pass
+
+		search_roots = []
+		for key in ["ProgramFiles", "ProgramFiles(x86)"]:
+			path = os.environ.get(key)
+			if path and os.path.isdir(path):
+				search_roots.append(path)
+
+		for root_path in search_roots:
+			try:
+				for dir_name in os.listdir(root_path):
+					potential_path = os.path.join(root_path, dir_name)
+					if os.path.isdir(potential_path):
+						for root, _, files in os.walk(potential_path):
+							if "java.exe" in files and root.endswith("bin"):
+								java_path = os.path.join(root, "java.exe")
+								if "jre" not in java_path.lower():
+									return java_path # nested hell :)
+
+			except (FileNotFoundError, PermissionError):
+				continue
+
+		return None
+
+	@staticmethod
+	def check_java_version() -> Tuple[bool, Optional[str], Optional[int]]:
+		java_exe_path = JavaUtils._find_java_executable()
+
+		if not java_exe_path:
+			return False, None, None
+
+		try:
+			result = subprocess.run(
+				[java_exe_path, '-version'],
+				capture_output=True,
+				text=True,
+				timeout=10,
+				encoding='utf-8',
+				errors='ignore',
+				creationflags=subprocess.CREATE_NO_WINDOW
 			)
 
 			if result.returncode == 0:
@@ -42,21 +88,3 @@ class JavaUtils:
 	@staticmethod
 	def is_version_supported(major_version: int, required: int = 21) -> bool:
 		return major_version >= required
-
-	@staticmethod
-	def get_java_executable_path() -> Optional[str]:
-		try:
-			result = subprocess.run(
-				['where', 'java'],
-				capture_output=True,
-				text=True,
-				shell=True
-			)
-
-			if result.returncode == 0:
-				return result.stdout.strip().split('\n')[0]
-
-		except Exception:
-			pass
-
-		return None

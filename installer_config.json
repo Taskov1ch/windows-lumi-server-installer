@@ -1,10 +1,10 @@
 {
-	"app_name": "Minecraft Lumi Core Installer",
+	"app_name": "Minecraft Lumi Server Installer",
 	"version": "1.0.0",
 	"github_repo": "KoshakMineDEV/Lumi",
 	"java_urls": {
-		"21": "https://download.oracle.com/java/21/latest/jdk-21_windows-x64_bin.exe",
-		"24": "https://download.oracle.com/java/24/latest/jdk-24_windows-x64_bin.exe"
+		"21": "https://cdn.azul.com/zulu/bin/zulu21.44.17-ca-jdk21.0.8-win_x64.msi",
+		"24": "https://cdn.azul.com/zulu/bin/zulu24.32.13-ca-jdk24.0.2-win_x64.msi"
 	},
 	"default_install_path": "C:\\LumiServer",
 	"server_jar_name": "Lumi.jar",

@@ -153,7 +153,7 @@ class InstallerApp(ctk.CTk):
 			messagebox.showerror("Ошибка", f"URL для Java {version} не найден в конфигурации.")
 			return
 
-		save_path = os.path.join(os.path.expanduser("~"), "Downloads", f"jdk-{version}_windows-x64_bin.exe")
+		save_path = os.path.join(os.path.expanduser("~"), "Downloads", os.path.basename(url))
 
 		self._set_java_ui_state("downloading")
 		self.java_download_label.configure(text="Подготовка к скачиванию...")
@@ -166,12 +166,16 @@ class InstallerApp(ctk.CTk):
 	def _install_java(self, installer_path):
 		logging.info(f"Запуск установщика Java: {installer_path}")
 		try:
-			subprocess.Popen([installer_path])
+			if installer_path.lower().endswith(".msi"):
+				subprocess.Popen(["msiexec", "/i", installer_path])
+			else:
+				subprocess.Popen([installer_path])
+
 			messagebox.showinfo(
 				"Установка Java",
 				"Установщик Java запущен.\n\n"
 				"Пожалуйста, пройдите все шаги в окне установщика.\n\n"
-				"Нажмите 'OK' здесь **только после** завершения установки."
+				"Нажмите 'OK' здесь только после завершения установки."
 			)
 			self.go_to_step(2)
 		except Exception as e:
