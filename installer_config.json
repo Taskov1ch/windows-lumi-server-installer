@@ -1,0 +1,12 @@
+{
+	"app_name": "Minecraft Lumi Core Installer",
+	"version": "1.0.0",
+	"github_repo": "KoshakMineDEV/Lumi",
+	"java_urls": {
+		"21": "https://download.oracle.com/java/21/latest/jdk-21_windows-x64_bin.exe",
+		"24": "https://download.oracle.com/java/24/latest/jdk-24_windows-x64_bin.exe"
+	},
+	"default_install_path": "C:\\LumiServer",
+	"server_jar_name": "Lumi.jar",
+	"required_java_version": 21
+}
