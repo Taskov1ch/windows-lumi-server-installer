@@ -1,11 +1,11 @@
-:: Сколько гигабайт ОЗУ выделить серверу
-set MEMORY={MEMORY}
-set CORE_NAME={CORE_NAME}
-
-:: Дальше без знаний cmd windows не лезть :)
-
 @echo off
 chcp 65001 >nul
+
+:: Сколько гигабайт ОЗУ выделить серверу
+set MEMORY={MEMORY}
+
+:: Дальше без знаний cmd windows не лезть :)
+set CORE_NAME={CORE_NAME}
 
 title Minecraft Lumi Server
 echo Запуск сервера...

@@ -1,12 +1,27 @@
 {
 	"app_name": "Minecraft Lumi Server Installer",
-	"version": "1.0.0",
+	"version": "1.1.0",
 	"github_repo": "KoshakMineDEV/Lumi",
 	"java_urls": {
-		"21": "https://cdn.azul.com/zulu/bin/zulu21.44.17-ca-jdk21.0.8-win_x64.msi",
-		"24": "https://cdn.azul.com/zulu/bin/zulu24.32.13-ca-jdk24.0.2-win_x64.msi"
+		"linux": {
+			"21": {
+				"x64": "https://cdn.azul.com/zulu/bin/zulu21.44.17-ca-jdk21.0.8-linux_x64.tar.gz",
+				"aarch64": "https://cdn.azul.com/zulu/bin/zulu21.44.17-ca-jdk21.0.8-linux_aarch64.tar.gz"
+			},
+			"24": {
+				"x64": "https://cdn.azul.com/zulu/bin/zulu24.32.13-ca-jdk24.0.2-linux_x64.tar.gz",
+				"aarch64": "https://cdn.azul.com/zulu/bin/zulu24.32.13-ca-jdk24.0.2-linux_aarch64.tar.gz"
+			}
+		},
+		"windows": {
+			"21": "https://cdn.azul.com/zulu/bin/zulu21.44.17-ca-jdk21.0.8-win_x64.msi",
+			"24": "https://cdn.azul.com/zulu/bin/zulu24.32.13-ca-jdk24.0.2-win_x64.msi"
+		}
 	},
-	"default_install_path": "C:\\LumiServer",
+	"default_install_path": {
+		"windows": "C:/LumiServer",
+		"linux": "/opt/lumi_server"
+	},
 	"server_jar_name": "Lumi.jar",
 	"required_java_version": 21
 }
