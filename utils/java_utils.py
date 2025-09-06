@@ -3,21 +3,33 @@ import re
 import os
 from typing import Optional, Tuple
 
+import subprocess
+import platform
+
+def _creationflags():
+	if platform.system() == "Windows":
+		return subprocess.CREATE_NO_WINDOW
+	return 0
+
+
 class JavaUtils:
 	@staticmethod
 	def _find_java_executable() -> Optional[str]:
 		try:
 			result = subprocess.run(
-				['where', 'java'],
+				['where', 'java'] if platform.system() == "Windows" else ['which', 'java'],
 				capture_output=True,
 				text=True,
 				check=True,
 				timeout=5,
-				creationflags=subprocess.CREATE_NO_WINDOW
+				creationflags=_creationflags()
 			)
 			return result.stdout.strip().split('\n')[0]
 		except (subprocess.CalledProcessError, FileNotFoundError, subprocess.TimeoutExpired):
 			pass
+
+		if platform.system() != "Windows":
+			return
 
 		search_roots = []
 		for key in ["ProgramFiles", "ProgramFiles(x86)"]:
@@ -56,7 +68,7 @@ class JavaUtils:
 				timeout=10,
 				encoding='utf-8',
 				errors='ignore',
-				creationflags=subprocess.CREATE_NO_WINDOW
+				creationflags=_creationflags()
 			)
 
 			if result.returncode == 0:

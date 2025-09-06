@@ -4,19 +4,32 @@ on:
   push:
     branches:
       - main
+  pull_request:
+    types:
+      - closed
+    branches:
+      - main
+  workflow_dispatch:
 
 permissions:
   contents: write
 
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+
+    outputs:
+      VERSION: ${{ steps.get_version.outputs.VERSION }}
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Python 3.13
+      - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.13"
@@ -26,26 +39,56 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Build with PyInstaller
+      - name: Build with PyInstaller (Windows)
+        if: matrix.os == 'windows-latest'
+        run: python build.py --target exe
+
+      - name: Build with PyInstaller (Linux)
+        if: matrix.os == 'ubuntu-latest'
         run: |
-          python build.py
+          python build.py --target linux
+          chmod +x dist/LumiInstaller
 
       - name: Get version from config
         id: get_version
         run: |
-          $version = (Get-Content -Raw installer_config.json | ConvertFrom-Json).version
-          echo "VERSION=$version" >> $env:GITHUB_OUTPUT
+          python -c "import json; print(f'VERSION={json.load(open(\"installer_config.json\"))[\"version\"]}')" >> $GITHUB_OUTPUT
+
+      - name: Rename artifact
+        shell: bash
+        run: |
+          if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+            mv dist/LumiInstaller.exe dist/LumiInstaller-Windows.exe
+          else
+            mv dist/LumiInstaller dist/LumiInstaller-Linux
+          fi
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: LumiInstaller-${{ matrix.os }}
+          path: dist/*
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: v${{ steps.get_version.outputs.VERSION }}
-          name: v${{ steps.get_version.outputs.VERSION }}
+          tag_name: v${{ needs.build.outputs.VERSION }}
+          name: v${{ needs.build.outputs.VERSION }}
           body: |
             Release built from commit: ${{ github.sha }}
 
             Changes:
             ${{ github.event.head_commit.message }}
-          files: dist/LumiInstaller.exe
+          files: dist/**/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
