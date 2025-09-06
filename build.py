@@ -1,16 +1,20 @@
 import PyInstaller.__main__
 import sys
+import os
 
 MAIN_SCRIPT = "main.py"
 OUTPUT_NAME = "LumiInstaller"
+
+def data_arg(src, dest):
+	return f"--add-data={src}{os.pathsep}{dest}"
 
 common_opts = [
 	MAIN_SCRIPT,
 	"--onefile",
 	"--clean",
 	f"--name={OUTPUT_NAME}",
-	"--add-data=installer_config.json;.",
-	"--add-data=resources;resources"
+	data_arg("installer_config.json", "."),
+	data_arg("resources", "resources")
 ]
 
 if __name__ == "__main__":
@@ -26,7 +30,6 @@ if __name__ == "__main__":
 		]
 	elif target == "linux":
 		pass
-
 	else:
 		print(f"Unknown target: {target}")
 		sys.exit(1)

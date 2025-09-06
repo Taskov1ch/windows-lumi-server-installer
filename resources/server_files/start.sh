@@ -2,6 +2,9 @@
 # Сколько гигабайт ОЗУ выделить серверу
 MEMORY={MEMORY}
 
+# Задержка перед перезапуском (в секундах)
+RESTART_DELAY=5
+
 CORE_NAME="{CORE_NAME}"
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 
@@ -18,5 +21,6 @@ while true; do
 
 	echo
 	echo "Сервер остановлен."
-	read -p "Нажмите Enter для перезапуска или Ctrl+C для выхода..." _
+	echo "Перезапуск через ${RESTART_DELAY} секунд..."
+	sleep ${RESTART_DELAY}
 done

@@ -39,15 +39,20 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Build with PyInstaller
-        run: python build.py
+      - name: Build with PyInstaller (Windows)
+        if: matrix.os == 'windows-latest'
+        run: python build.py --target exe
+
+      - name: Build with PyInstaller (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          python build.py --target linux
+          chmod +x dist/LumiInstaller
 
       - name: Get version from config
         id: get_version
-        shell: bash
         run: |
-          VERSION=$(jq -r .version installer_config.json)
-          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+          python -c "import json; print(f'VERSION={json.load(open(\"installer_config.json\"))[\"version\"]}')" >> $GITHUB_OUTPUT
 
       - name: Rename artifact
         shell: bash
