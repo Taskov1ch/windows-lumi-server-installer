@@ -52,7 +52,8 @@ jobs:
       - name: Get version from config
         id: get_version
         run: |
-          python -c "import json; print(f'VERSION={json.load(open(\"installer_config.json\"))[\"version\"]}')" >> $GITHUB_OUTPUT
+          VERSION=$(python get_version.py)
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
 
       - name: Rename artifact
         shell: bash
