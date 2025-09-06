@@ -1,94 +1,110 @@
 # 🌟 LumiServer Installer
 
-**Графический установщик для Minecraft Bedrock Edition ядра [Lumi](https://github.com/KoshakMineDEV/Lumi).**
-Простой и удобный инструмент, который автоматизирует установку сервера и настройку необходимых компонентов.
+**Graphical installer for the Minecraft Bedrock Edition core [Lumi](https://github.com/KoshakMineDEV/Lumi).**  
+A simple and convenient tool that automates the setup of your server and all required components.
 
 ---
 
-## ⚠️ Важно!
+## ⚠️ Disclaimer
 
-Этот проект **не связан** с официальным проектом [Lumi](https://github.com/KoshakMineDEV/Lumi) и его [разработчиками](https://github.com/KoshakMineDEV/Lumi/graphs/contributors). Любые совпадения случайны.
-
----
-
-## 🚀 Возможности
-
-* Автоматическая проверка и установка Java (версии 21+)
-* Загрузка последней версии ядра Lumi с GitHub
-* Выбор папки для установки
-* Логи установки для диагностики проблем
+This project is **not affiliated** with the official [Lumi project](https://github.com/KoshakMineDEV/Lumi) or its [contributors](https://github.com/KoshakMineDEV/Lumi/graphs/contributors).  
+Any similarities are purely coincidental.
 
 ---
 
-## 📦 Установка
+## 🌍 Language Notice
 
-### Требования
+Currently, the installer is available **only in Russian**.  
+Multi-language support (including English) will be added in a future release.
 
-* Python 3.8 и выше
-* Windows 7 / 8 / 10 / 11
+---
 
-### Установка зависимостей
+## 🚀 Features
+
+- Automatic check and installation of Java (21+)
+- Fetching the latest Lumi core release from GitHub
+- Choose installation directory
+- Detailed installation logs for troubleshooting
+- Pre-configured server start scripts (Windows `.cmd` and Linux `.sh`)
+
+---
+
+## 📦 Installation
+
+### Requirements
+
+- Python 3.8 or newer
+- Windows 7 / 8 / 10 / 11  
+  (Linux support is experimental)
+
+### Install dependencies
 
 ```bash
 pip install -r requirements.txt
-```
+````
 
-### Запуск установщика
+### Run the installer (source)
 
 ```bash
 python main.py
 ```
 
-### Сборка в исполняемый файл
+### Build executable
 
 ```bash
 python build.py
 ```
 
-После сборки будет создан файл `LumiInstaller.exe`, который можно запускать без установленного Python.
+After building, an executable file will be created:
+
+* **Windows:** `LumiInstaller.exe`
+* **Linux:** `LumiInstaller`
+
+These can be run without Python installed.
 
 ---
 
-## 🔧 Разработка
+## 🔧 Development
 
-### Основные зависимости
+### Main dependencies
 
-* `customtkinter` – современный GUI фреймворк
-* `requests` – работа с HTTP-запросами для загрузки файлов
-* `pyinstaller` – сборка в исполняемый файл
+* [`customtkinter`](https://github.com/TomSchimansky/CustomTkinter) – modern GUI framework
+* [`requests`](https://pypi.org/project/requests/) – HTTP client for downloads
+* [`pyinstaller`](https://pyinstaller.org/) – build standalone executables
 
-### Сборка
+### Build system
 
-Сборка выполняется через `build.py` с уже настроенными параметрами PyInstaller.
-Приложение включает все необходимые ресурсы и готово к запуску.
-
----
-
-## 📝 Лицензия
-
-Проект не имеет отдельной лицензии. Ядро Lumi распространяется под лицензией **LGPL-3.0**.
+All PyInstaller options are already configured inside `build.py`.
+The final application bundles all required resources and is ready to launch.
 
 ---
 
-## 🤝 Поддержка
+## 🚀 Running the server
 
-Если возникнут проблемы:
+After installation:
 
-1. Убедитесь, что установлена **Java 21** или выше
-2. Проверьте подключение к интернету
-3. Убедитесь, что у вас есть права на запись в выбранную папку
-4. Логи установки сохраняются в `installer.log`
-
----
-
-## 🚀 Запуск сервера
-
-После успешной установки:
-
-1. Перейдите в папку установки
-2. Запустите `start.cmd`
-3. Сервер запустится с настройками по умолчанию (4 GB RAM). Можно изменить параметры в `start.cmd`.
+1. Go to your server folder
+2. Run `start.cmd` (Windows) or `start.sh` (Linux)
+3. By default, the server uses **4 GB RAM**. You can change this in the start script.
 
 ---
 
-**Разработано для самых маленьких, форума [Talk 24Serv](https://talk.24serv.pro/)**
+## 📝 License
+
+This project does not have a separate license.
+The Lumi core is distributed under **LGPL-3.0**.
+
+---
+
+## 🤝 Support
+
+If you run into issues:
+
+1. Make sure **Java 21+** is installed
+2. Check your internet connection
+3. Verify you have write permissions in the selected folder
+4. Check `installer.log` for detailed error messages
+
+---
+
+**Created for the youngest players, and the [Talk 24Serv](https://talk.24serv.pro/) community ❤️**
