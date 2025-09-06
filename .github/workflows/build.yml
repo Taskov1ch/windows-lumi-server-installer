@@ -49,12 +49,6 @@ jobs:
           python build.py --target linux
           chmod +x dist/LumiInstaller
 
-      - name: Get version from config
-        id: get_version
-        run: |
-          VERSION=$(python get_version.py)
-          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
-
       - name: Rename artifact
         shell: bash
         run: |
@@ -75,16 +69,28 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
           path: dist
 
+      - name: Get version from config
+        id: get_version
+        run: |
+          VERSION=$(python get_version.py)
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: (Optional) Fix permissions
+        run: chmod +x dist/**/LumiInstaller-Linux || true
+
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: v${{ needs.build.outputs.VERSION }}
-          name: v${{ needs.build.outputs.VERSION }}
+          tag_name: v${{ steps.get_version.outputs.VERSION }}
+          name: v${{ steps.get_version.outputs.VERSION }}
           body: |
             Release built from commit: ${{ github.sha }}
 
