@@ -32,7 +32,6 @@ class InstallerApp(ctk.CTk):
 		self.PADDING_X = 20
 		self.PADDING_Y = 10
 
-		# ── Конфиг ────────────────────────────────────────────────────────────────
 		try:
 			with open(get_resource_path("installer_config.json"), "r", encoding="utf-8") as f:
 				self.config = json.load(f)
@@ -45,7 +44,6 @@ class InstallerApp(ctk.CTk):
 		self.geometry("600x450")
 		self.resizable(False, False)
 
-		# Иконка (на Linux может не подойти .ico — оборачиваем в try)
 		try:
 			icon_path = get_resource_path("resources/assets/icon.ico")
 			if os.path.exists(icon_path) and self.IS_WINDOWS:
@@ -53,7 +51,6 @@ class InstallerApp(ctk.CTk):
 		except Exception as e:
 			logging.warning(f"Could not load icon: {e}")
 
-		# Базовая папка установки в зависимости от ОС
 		if self.IS_WINDOWS:
 			self.install_path = self.config["default_install_path"]["windows"]
 		elif self.IS_LINUX:
@@ -65,11 +62,10 @@ class InstallerApp(ctk.CTk):
 			self.after(10, self.destroy)
 			return
 
-		self.current_download = None   # "java" | "core" | None
+		self.current_download = None
 		self.download_queue = queue.Queue()
 		self.current_step_index = 0
 
-		# ── Контейнер для шагов ──────────────────────────────────────────────────
 		self.container = ctk.CTkFrame(self)
 		self.container.pack(fill="both", expand=True, padx=10, pady=10)
 		self.container.grid_rowconfigure(0, weight=1)
@@ -90,13 +86,9 @@ class InstallerApp(ctk.CTk):
 		self.go_to_step(0)
 		self._check_download_queue()
 
-		# Предупреждение, если utils-пакет заглушечный
 		if "get_download_url" not in dir(GitHubAPI):
 			messagebox.showwarning("Отсутствуют утилиты", "Вспомогательные файлы не найдены. Функциональность будет ограничена.")
 
-	# ─────────────────────────────────────────────────────────────────────────────
-	# Навигация по шагам
-	# ─────────────────────────────────────────────────────────────────────────────
 	def create_navigation_buttons(self, parent, back_func, next_func, next_text="Далее"):
 		nav_frame = ctk.CTkFrame(parent, fg_color="transparent")
 		nav_frame.pack(side="bottom", fill="x", padx=self.PADDING_X, pady=self.PADDING_Y)
@@ -119,23 +111,19 @@ class InstallerApp(ctk.CTk):
 		frame = self.steps[index]
 		frame.tkraise()
 
-		# Автоматические действия при входе на некоторые шаги
-		if index == 2:  # Java check
+		if index == 2:
 			self._run_java_check()
-		elif index == 5:  # Core download
+		elif index == 5:
 			self._start_core_download()
-		elif index == 6:  # Create files
+		elif index == 6:
 			self._create_service_files()
 
-	# ─────────────────────────────────────────────────────────────────────────────
-	# Проверка Java
-	# ─────────────────────────────────────────────────────────────────────────────
 	def _run_java_check(self):
 		found, version_str, major_version = JavaUtils.check_java_version()
 		if found and JavaUtils.is_version_supported(major_version, self.config["required_java_version"]):
 			logging.info(f"Найдена подходящая версия Java: {version_str}")
 			messagebox.showinfo("Java найдена", f"Обнаружена Java версии {version_str}. Установка Java будет пропущена.")
-			self.go_to_step(4)  # к выбору пути
+			self.go_to_step(4)
 		else:
 			logging.warning("Подходящая версия Java не найдена.")
 			if version_str:
@@ -151,11 +139,8 @@ class InstallerApp(ctk.CTk):
 					"Если вы уверены, что Java установлена, попробуйте перезапустить этот установщик. "
 					"Либо же просто пропустите этот шаг."
 				)
-			self.go_to_step(3)  # шаг установки Java
+			self.go_to_step(3)
 
-	# ─────────────────────────────────────────────────────────────────────────────
-	# Создание служебных файлов (start.cmd / start.sh)
-	# ─────────────────────────────────────────────────────────────────────────────
 	def _create_service_files(installer: "InstallerApp"):
 		try:
 			if installer.IS_WINDOWS:
@@ -173,8 +158,8 @@ class InstallerApp(ctk.CTk):
 				)
 
 			FileUtils.write_text_file(dst, content)
+
 			if installer.IS_LINUX:
-				# Делает start.sh исполняемым
 				st = os.stat(dst)
 				os.chmod(dst, st.st_mode | stat.S_IEXEC)
 
@@ -185,9 +170,6 @@ class InstallerApp(ctk.CTk):
 			messagebox.showerror("Ошибка", f"Не удалось создать файлы: {e}")
 			installer.go_to_step(4)
 
-	# ─────────────────────────────────────────────────────────────────────────────
-	# UI-состояние блока установки Java
-	# ─────────────────────────────────────────────────────────────────────────────
 	def _set_java_ui_state(self, state: str):
 		if state == "downloading":
 			self.java_selection_frame.pack_forget()
@@ -198,9 +180,6 @@ class InstallerApp(ctk.CTk):
 			self.java_selection_frame.pack(pady=self.PADDING_Y, padx=self.PADDING_X, fill="x")
 			self.java_nav_frame.pack(side="bottom", fill="x", padx=self.PADDING_X, pady=self.PADDING_Y)
 
-	# ─────────────────────────────────────────────────────────────────────────────
-	# Скачивание Java (учёт ОС и архитектуры)
-	# ─────────────────────────────────────────────────────────────────────────────
 	def _download_java(self):
 		version = self.java_version_var.get()
 
@@ -215,17 +194,20 @@ class InstallerApp(ctk.CTk):
 			else:
 				messagebox.showerror("Ошибка", f"Архитектура {arch} не поддерживается.")
 				return
+
 			url = self.config["java_urls"]["linux"][version].get(arch_key)
 		else:
 			messagebox.showerror("Ошибка", "Ваша ОС пока не поддерживается.")
 			return
 
 		if not url:
-			logging.error(f"URL для Java {version} не найден в конфигурации.")
 			messagebox.showerror("Ошибка", f"URL для Java {version} не найден в конфигурации.")
 			return
 
-		save_path = os.path.join(os.path.expanduser("~"), "Downloads", os.path.basename(url))
+		temp_dir = os.path.join(os.path.expanduser("~"), ".lumi-installer", "downloads")
+		os.makedirs(temp_dir, exist_ok=True)
+
+		save_path = os.path.join(temp_dir, os.path.basename(url))
 
 		self._set_java_ui_state("downloading")
 		self.java_download_label.configure(text="Подготовка к скачиванию...")
@@ -234,14 +216,10 @@ class InstallerApp(ctk.CTk):
 
 		DownloaderThread(url, save_path, self.download_queue).start()
 
-	# ─────────────────────────────────────────────────────────────────────────────
-	# Установка Java (Windows: запускаем MSI; Linux: распаковываем tar.gz)
-	# ─────────────────────────────────────────────────────────────────────────────
 	def _install_java(self, installer_path):
 		logging.info(f"Обработка установщика Java: {installer_path}")
 		try:
 			if self.IS_WINDOWS:
-				# MSI/EXE запуск
 				if installer_path.lower().endswith(".msi"):
 					subprocess.Popen(["msiexec", "/i", installer_path])
 				else:
@@ -251,12 +229,11 @@ class InstallerApp(ctk.CTk):
 					"Установка Java",
 					"Установщик Java запущен.\n\n"
 					"Пожалуйста, пройдите все шаги в окне установщика.\n\n"
-					"Нажмите 'OK' здесь только после завершения установки."
+					"Нажмите 'OK' здесь только ПОСЛЕ завершения установки."
 				)
 				self.go_to_step(2)
 
 			elif self.IS_LINUX:
-				# Для Linux качаем tar.gz и распаковываем в папку установки
 				if not installer_path.endswith(".tar.gz"):
 					messagebox.showerror("Ошибка", "Ожидался архив .tar.gz для Linux.")
 					return
@@ -265,10 +242,11 @@ class InstallerApp(ctk.CTk):
 				os.makedirs(self.install_path, exist_ok=True)
 
 				with tarfile.open(installer_path, "r:gz") as tar:
-					# Имя корневой папки внутри архива (обычно zulu-xx-xx...)
 					members = tar.getmembers()
+
 					if not members:
 						raise RuntimeError("Архив Java пуст.")
+
 					root = members[0].name.split('/')[0].strip("/")
 					tar.extractall(self.install_path)
 
@@ -276,9 +254,9 @@ class InstallerApp(ctk.CTk):
 				if not os.path.isdir(extracted_root):
 					raise RuntimeError(f"Не найдена распакованная папка {extracted_root}")
 
-				# Заменяем/создаём <install>/java
 				if os.path.isdir(java_dest):
 					shutil.rmtree(java_dest, ignore_errors=True)
+
 				shutil.move(extracted_root, java_dest)
 
 				messagebox.showinfo(
@@ -306,11 +284,7 @@ class InstallerApp(ctk.CTk):
 		finally:
 			self._set_java_ui_state("idle")
 
-	# ─────────────────────────────────────────────────────────────────────────────
-	# Выбор пути установки
-	# ─────────────────────────────────────────────────────────────────────────────
 	def _select_install_path(self):
-		# initialdir должен быть не dict, а строка — берём текущий self.install_path
 		path = filedialog.askdirectory(initialdir=self.install_path)
 		if path:
 			self.install_path = path
@@ -325,9 +299,6 @@ class InstallerApp(ctk.CTk):
 		logging.info(f"Папка для установки: {self.install_path}")
 		self.go_to_step(5)
 
-	# ─────────────────────────────────────────────────────────────────────────────
-	# Скачивание ядра
-	# ─────────────────────────────────────────────────────────────────────────────
 	def _start_core_download(self):
 		repo_owner, repo_name = self.config["github_repo"].split("/")
 		github_api = GitHubAPI(repo_owner, repo_name)
@@ -343,9 +314,6 @@ class InstallerApp(ctk.CTk):
 		DownloaderThread(download_url, save_path, self.download_queue).start()
 		logging.info(f"Начало скачивания ядра с {download_url}")
 
-	# ─────────────────────────────────────────────────────────────────────────────
-	# Обработка очереди прогресса загрузок
-	# ─────────────────────────────────────────────────────────────────────────────
 	def _check_download_queue(self):
 		try:
 			msg = self.download_queue.get_nowait()
@@ -379,9 +347,6 @@ class InstallerApp(ctk.CTk):
 		finally:
 			self.after(100, self._check_download_queue)
 
-	# ─────────────────────────────────────────────────────────────────────────────
-	# Утилиты
-	# ─────────────────────────────────────────────────────────────────────────────
 	def _open_folder(self, path: str):
 		try:
 			if self.IS_WINDOWS:

@@ -37,17 +37,17 @@ class GitHubAPI:
 
 		return None
 
-	def get_release_info(self) -> Dict[str, str]:
+	def get_download_info(self) -> Optional[Dict]:
 		release_data = self.get_latest_release()
-
 		if not release_data:
-			return {}
+			return None
 
-		return {
-			"version": release_data.get("tag_name", "Unknown"),
-			"name": release_data.get("name", "Unknown"),
-			"description": release_data.get("body", ""),
-			"published_at": release_data.get("published_at", ""),
-			"download_count": sum(asset.get("download_count", 0)
-								for asset in release_data.get("assets", []))
-		}
+		assets = release_data.get("assets", [])
+		for asset in assets:
+			if asset["name"].endswith(".jar") and asset["name"].startswith("Lumi"):
+				return {
+					"version": release_data.get("tag_name"),
+					"asset_name": asset["name"],
+					"download_url": asset["browser_download_url"]
+				}
+		return None

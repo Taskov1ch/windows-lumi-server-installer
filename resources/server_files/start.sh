@@ -2,8 +2,6 @@
 # Сколько гигабайт ОЗУ выделить серверу
 MEMORY={MEMORY}
 
-
-
 CORE_NAME="{CORE_NAME}"
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 

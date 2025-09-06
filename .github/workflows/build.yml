@@ -4,6 +4,11 @@ on:
   push:
     branches:
       - main
+  pull_request:
+    types:
+      - closed
+    branches:
+      - main
   workflow_dispatch:
 
 permissions:
@@ -16,6 +21,9 @@ jobs:
     strategy:
       matrix:
         os: [windows-latest, ubuntu-latest]
+
+    outputs:
+      VERSION: ${{ steps.get_version.outputs.VERSION }}
 
     steps:
       - name: Checkout code
@@ -40,6 +48,15 @@ jobs:
         run: |
           VERSION=$(jq -r .version installer_config.json)
           echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Rename artifact
+        shell: bash
+        run: |
+          if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+            mv dist/LumiInstaller.exe dist/LumiInstaller-Windows.exe
+          else
+            mv dist/LumiInstaller dist/LumiInstaller-Linux
+          fi
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4

@@ -111,4 +111,4 @@ class Steps:
 	@staticmethod
 	def close(inslaller: "InstallerApp"):
 		inslaller.destroy()
-		os.startfile(inslaller.install_path)
+		inslaller._open_folder(inslaller.install_path)
