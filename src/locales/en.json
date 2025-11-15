@@ -1,12 +1,66 @@
 {
 	"translation": {
-		"language": "Russian",
+		"language": "English",
 		"next": "Next",
 		"back": "Back",
-		"title": "Lumi Server Manager",
+		"title": "Lumi Servers Manager",
 		"version": "Version {{version}}",
-		"errors": {
-			"java_not_found": "Java not found. Please install Java {{version}} or higher."
+		"where_java": {
+			"title": "Seems... You don't have Java installed?",
+			"java_not_found": "JDK {{version}} not found!",
+			"check_again_button": "Check Again",
+			"loading_config": "Loading instructions...",
+			"windows": {
+				"title": "For Windows",
+				"link_order": [
+					"adoptium",
+					"oracle",
+					"zulu"
+				],
+				"links": {
+					"adoptium": {
+						"name": "Adoptium Temurin (JDK 21)",
+						"description": "The recommended, fully open-source OpenJDK distribution."
+					},
+					"oracle": {
+						"name": "Oracle Java (JDK 21)",
+						"description": "Official Java distribution from Oracle."
+					},
+					"zulu": {
+						"name": "Azul Zulu (JDK 21)",
+						"description": "Verified, certified builds of OpenJDK."
+					}
+				}
+			},
+			"linux": {
+				"title": "For Linux",
+				"code_title": "Execute in terminal:",
+				"tabs": {
+					"ubuntu": "Ubuntu/Debian",
+					"fedora": "Fedora/RHEL",
+					"arch": "Arch Linux",
+					"nixos": "NixOS"
+				},
+				"distros": {
+					"ubuntu": {
+						"label": "Ubuntu/Debian (Kubuntu, Linux Mint, Pop!_OS, Zorin OS):",
+						"command": "sudo apt update && sudo apt install openjdk-21-jdk"
+					},
+					"fedora": {
+						"label": "CentOS/Fedora/RHEL (Rocky Linux, AlmaLinux, Nobara):",
+						"command": "sudo dnf install java-21-openjdk-devel"
+					},
+					"arch": {
+						"label": "Arch Linux (Manjaro, Garuda Linux, CachyOS, Artix Linux):",
+						"command": "sudo pacman -Syu jdk21-openjdk"
+					},
+					"nixos": {
+						"label": "In /etc/nixos/configuration.nix:",
+						"command": "environment.systemPackages = [ ... pkgs.openjdk21 ];",
+						"note": "Then run: sudo nixos-rebuild switch"
+					}
+				}
+			}
 		}
 	}
 }

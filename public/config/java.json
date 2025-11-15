@@ -1,0 +1,14 @@
+{
+	"required_java_version": "21",
+	"windows_links": {
+		"adoptium": {
+			"url": "https://adoptium.net/temurin/releases/?version=21"
+		},
+		"oracle": {
+			"url": "https://www.oracle.com/java/technologies/downloads/#jdk21-windows"
+		},
+		"zulu": {
+			"url": "https://www.azul.com/downloads/?version=java-21-lts&os=windows&package=jdk#zulu"
+		}
+	}
+}

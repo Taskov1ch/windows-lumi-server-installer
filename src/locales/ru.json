@@ -3,10 +3,64 @@
 		"language": "Русский",
 		"next": "Далее",
 		"back": "Назад",
-		"title": "Мененджер сервера Lumi",
+		"title": "Менеджер серверов Lumi",
 		"version": "Версия {{version}}",
-		"errors": {
-			"java_not_found": "Java не найдена. Пожалуйста, установите Java {{version}} или выше."
+		"where_java": {
+			"title": "Кажется... У вас не установлена Java?",
+			"java_not_found": "JDK {{version}} не найден!",
+			"check_again_button": "Проверить снова",
+			"loading_config": "Загрузка инструкций...",
+			"windows": {
+				"title": "Для Windows",
+				"link_order": [
+					"adoptium",
+					"oracle",
+					"zulu"
+				],
+				"links": {
+					"adoptium": {
+						"name": "Adoptium Temurin (JDK 21)",
+						"description": "Рекомендуемый, полностью открытый дистрибутив OpenJDK."
+					},
+					"oracle": {
+						"name": "Oracle Java (JDK 21)",
+						"description": "Официальный дистрибутив Java от Oracle."
+					},
+					"zulu": {
+						"name": "Azul Zulu (JDK 21)",
+						"description": "Проверенные, сертифицированные сборки OpenJDK."
+					}
+				}
+			},
+			"linux": {
+				"title": "Для Linux",
+				"code_title": "В терминале выполните:",
+				"tabs": {
+					"ubuntu": "Ubuntu/Debian",
+					"fedora": "Fedora/RHEL",
+					"arch": "Arch Linux",
+					"nixos": "NixOS"
+				},
+				"distros": {
+					"ubuntu": {
+						"label": "Ubuntu/Debian (Kubuntu, Linux Mint, Pop!_OS, Zorin OS):",
+						"command": "sudo apt update && sudo apt install openjdk-21-jdk"
+					},
+					"fedora": {
+						"label": "CentOS/Fedora/RHEL (Rocky Linux, AlmaLinux, Nobara):",
+						"command": "sudo dnf install java-21-openjdk-devel"
+					},
+					"arch": {
+						"label": "Arch Linux (Manjaro, Garuda Linux, CachyOS, Artix Linux):",
+						"command": "sudo pacman -Syu jdk21-openjdk"
+					},
+					"nixos": {
+						"label": "В /etc/nixos/configuration.nix:",
+						"command": "environment.systemPackages = [ ... pkgs.openjdk21 ];",
+						"note": "Затем выполните: sudo nixos-rebuild switch"
+					}
+				}
+			}
 		}
 	}
 }

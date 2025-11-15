@@ -7,6 +7,10 @@
 		Helvetica, Arial, sans-serif;
 }
 
+body {
+	background-color: var(--color-background);
+}
+
 @font-face {
 	font-family: "AA Stetica";
 	src: url("/fonts/AA Stetica Regular.otf") format("opentype"),

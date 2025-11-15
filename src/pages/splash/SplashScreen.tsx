@@ -9,7 +9,7 @@ interface SplashScreenProps {
 	onFinish?: () => void;
 }
 
-export const SplashScreen = ({ onFinish }: SplashScreenProps) => {
+const SplashScreen = ({ onFinish }: SplashScreenProps) => {
 	const [animationData, setAnimationData] = useState(null);
 	const { t } = useTranslation();
 
@@ -80,3 +80,5 @@ export const SplashScreen = ({ onFinish }: SplashScreenProps) => {
 		</motion.div>
 	);
 };
+
+export default SplashScreen;

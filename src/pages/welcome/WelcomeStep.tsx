@@ -1,4 +1,4 @@
-export const WelcomeStep = () => {
+const WelcomeStep = () => {
 	return (
 		<div style={{ padding: 40, textAlign: "center", color: "white" }}>
 			<h1>Добро пожаловать!</h1>
@@ -6,3 +6,5 @@ export const WelcomeStep = () => {
 		</div>
 	);
 };
+
+export default WelcomeStep;
