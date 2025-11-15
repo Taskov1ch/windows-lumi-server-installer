@@ -10,7 +10,7 @@ const JAVA_IS_INSTALLED = false;
 
 function App() {
 	const [showSplash, setShowSplash] = useState(true);
-	const [appFlowStep, setAppFlowStep] = useState(
+	const [appFlowStep] = useState(
 		JAVA_IS_INSTALLED ? 'welcome' : 'java-missing'
 	);
 
