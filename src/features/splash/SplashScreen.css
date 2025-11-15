@@ -4,6 +4,10 @@
 	--splash-lottie-size: 18.75rem;
 	--splash-title-margin-top: -1.25rem;
 	--blur-large: 7.5rem;
+	--font-family-sans: "AA Stetica", -apple-system, BlinkMacSystemFont,
+		"Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+	--font-family-system: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+		Helvetica, Arial, sans-serif;
 }
 
 .splash-container {
@@ -46,7 +50,8 @@
 .splash-title {
 	color: var(--color-text-primary);
 	margin-top: var(--splash-title-margin-top);
-	font-family: var(--font-family-system);
+	font-family: var(--font-family-sans);
+	-webkit-font-smoothing: antialiased;
 	font-size: var(--font-size-title);
 	font-weight: var(--font-weight-semibold);
 	letter-spacing: 0.05em;

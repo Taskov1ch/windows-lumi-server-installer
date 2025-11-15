@@ -6,3 +6,84 @@
 	--font-family-system: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
 		Helvetica, Arial, sans-serif;
 }
+
+@font-face {
+	font-family: "AA Stetica";
+	src: url("/fonts/AA Stetica Regular.otf") format("opentype"),
+		url("/fonts/AA-Stetica-Regular.ttf") format("truetype");
+	font-weight: 400;
+	font-style: normal;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: "AA Stetica";
+	src: url("/fonts/AA Stetica Italic.otf") format("opentype"),
+		url("/fonts/AA-Stetica-Italic.ttf") format("truetype");
+	font-weight: 400;
+	font-style: italic;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: "AA Stetica";
+	src: url("/fonts/AA Stetica Light.otf") format("opentype"),
+		url("/fonts/AA-Stetica-Light.ttf") format("truetype");
+	font-weight: 300;
+	font-style: normal;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: "AA Stetica";
+	src: url("/fonts/AA Stetica Light Italic.otf") format("opentype"),
+		url("/fonts/AA-Stetica-Light-Italic.ttf") format("truetype");
+	font-weight: 300;
+	font-style: italic;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: "AA Stetica";
+	src: url("/fonts/AA Stetica Medium.otf") format("opentype"),
+		url("/fonts/AA-Stetica-Medium.ttf") format("truetype");
+	font-weight: 500;
+	font-style: normal;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: "AA Stetica";
+	src: url("/fonts/AA Stetica Medium Italic.otf") format("opentype"),
+		url("/fonts/AA-Stetica-Medium-Italic.ttf") format("truetype");
+	font-weight: 500;
+	font-style: italic;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: "AA Stetica";
+	src: url("/fonts/AA Stetica Bold.otf") format("opentype"),
+		url("/fonts/AA-Stetica-Bold.ttf") format("truetype");
+	font-weight: 700;
+	font-style: normal;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: "AA Stetica";
+	src: url("/fonts/AA Stetica Bold Italic.otf") format("opentype"),
+		url("/fonts/AA-Stetica-Bold-Italic.ttf") format("truetype");
+	font-weight: 700;
+	font-style: italic;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: "AA Stetica";
+	src: url("/fonts/AA Stetica Black_0.otf") format("opentype"),
+		url("/fonts/AA-Stetica-Black_0.ttf") format("truetype");
+	font-weight: 900;
+	font-style: normal;
+	font-display: swap;
+}

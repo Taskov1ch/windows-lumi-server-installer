@@ -74,7 +74,7 @@ export const SplashScreen = ({ onFinish }: SplashScreenProps) => {
 						delay: 0.5
 					}}
 				>
-					{t("welcome.title")}
+					{t("title")}
 				</motion.h1>
 			</div>
 		</motion.div>
