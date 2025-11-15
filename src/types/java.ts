@@ -10,3 +10,11 @@ export interface JavaConfig {
 export interface WindowsInstructionsProps {
 	config: JavaConfig;
 }
+
+export interface JavaCheckResult {
+	is_installed: boolean;
+	version: string | null;
+	major_version: number | null;
+	is_compatible: boolean;
+	required_version: string;
+}

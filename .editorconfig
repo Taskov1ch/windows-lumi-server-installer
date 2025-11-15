@@ -4,5 +4,5 @@ root = true
 indent_style = tab
 indent_size = 2
 
-[*.ts]
+[*{.ts, .rs}]
 indent_size = 4

@@ -14,13 +14,13 @@ const SplashScreen = ({ onFinish }: SplashScreenProps) => {
 	const { t } = useTranslation();
 
 	useEffect(() => {
-		fetch("/lumi_animated.json")
+		fetch("/animations/lumi_animated.json")
 			.then((res) => res.json())
 			.then((data) => setAnimationData(data));
 
 		const timer = setTimeout(() => {
 			if (onFinish) onFinish();
-		}, 3500);
+		}, 2000);
 
 		return () => clearTimeout(timer);
 	}, [onFinish]);
@@ -32,7 +32,7 @@ const SplashScreen = ({ onFinish }: SplashScreenProps) => {
 			className="splash-container"
 			initial={{ opacity: 0 }}
 			animate={{ opacity: 1 }}
-			exit={{ opacity: 0, transition: { duration: 0.8 } }}
+			exit={{ opacity: 0, transition: { duration: 0.5 } }}
 		>
 			<motion.div
 				className="splash-glow-bg"
