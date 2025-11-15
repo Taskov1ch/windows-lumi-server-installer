@@ -1,0 +1,53 @@
+:root {
+	--font-size-title: 2rem;
+	--font-weight-semibold: 600;
+	--splash-lottie-size: 18.75rem;
+	--splash-title-margin-top: -1.25rem;
+	--blur-large: 7.5rem;
+}
+
+.splash-container {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100vw;
+	height: 100vh;
+	background-color: var(--color-background);
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	z-index: var(--z-index-splash);
+	overflow: hidden;
+}
+
+.splash-glow-bg {
+	position: absolute;
+	width: 40vw;
+	height: 40vw;
+	background: var(--color-primary-glow);
+	border-radius: 50%;
+	filter: blur(var(--blur-large));
+	z-index: 0;
+}
+
+.splash-content {
+	z-index: 1;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+.splash-lottie {
+	width: var(--splash-lottie-size);
+	height: var(--splash-lottie-size);
+}
+
+.splash-title {
+	color: var(--color-text-primary);
+	margin-top: var(--splash-title-margin-top);
+	font-family: var(--font-family-system);
+	font-size: var(--font-size-title);
+	font-weight: var(--font-weight-semibold);
+	letter-spacing: 0.05em;
+}

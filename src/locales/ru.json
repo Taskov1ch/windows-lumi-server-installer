@@ -1,0 +1,12 @@
+{
+	"translation": {
+		"language": "Русский",
+		"next": "Далее",
+		"back": "Назад",
+		"title": "Мененджер сервера Lumi",
+		"version": "Версия {{version}}",
+		"errors": {
+			"java_not_found": "Java не найдена. Пожалуйста, установите Java {{version}} или выше."
+		}
+	}
+}

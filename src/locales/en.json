@@ -1,0 +1,12 @@
+{
+	"translation": {
+		"language": "Russian",
+		"next": "Next",
+		"back": "Back",
+		"title": "Lumi Server Manager",
+		"version": "Version {{version}}",
+		"errors": {
+			"java_not_found": "Java not found. Please install Java {{version}} or higher."
+		}
+	}
+}
