@@ -5,6 +5,15 @@
 		"back": "Назад",
 		"title": "Менеджер серверов Lumi",
 		"version": "Версия {{version}}",
+		"welcome": {
+			"title": "Добро пожаловать!",
+			"subtitle": "Установщик готов к работе."
+		},
+		"settings": {
+			"title": "Настройки",
+			"language": "Язык",
+			"scale": "Масштаб приложения"
+		},
 		"where_java": {
 			"title": "Кажется... У вас не установлена Java?",
 			"java_not_found": "JDK {{version}} не найден!",

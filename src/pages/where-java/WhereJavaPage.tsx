@@ -8,6 +8,8 @@ import "./WhereJavaPage.css";
 import { JavaConfig } from "../../types/java";
 import LinuxInstructions from "../../components/LinuxInstructions/LinuxInstructions";
 import WindowsInstructions from "../../components/WindowsInstructions/WindowsInstructions";
+import { FaCog } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 
 
 const itemVariants = {
@@ -17,8 +19,10 @@ const itemVariants = {
 
 const WhereJavaPage = () => {
 	const { t } = useTranslation();
+	const navigate = useNavigate();
 	const [userOS, setUserOS] = useState<Platform | null>(null);
 	const [config, setConfig] = useState<JavaConfig | null>(null);
+
 
 	useEffect(() => {
 		const getPlatform = async () => {
@@ -69,9 +73,24 @@ const WhereJavaPage = () => {
 
 	return (
 		<div className="java-page-container">
-
-			<div className="java-glow-bg sphere1"></div>
-			<div className="java-glow-bg sphere2"></div>
+			<button
+				onClick={() => navigate("/settings")}
+				style={{
+					position: "fixed",
+					top: 20,
+					right: 20,
+					background: "none",
+					border: "none",
+					color: "white",
+					cursor: "pointer",
+					fontSize: "1.5rem",
+					opacity: 0.7,
+					zIndex: 10,
+				}}
+				title={t("settings.title")}
+			>
+				<FaCog />
+			</button>
 
 			<motion.div
 				className="java-page-content"

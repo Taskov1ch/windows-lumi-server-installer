@@ -5,37 +5,8 @@
 	align-items: center;
 	min-height: 100vh;
 	padding: 3rem 1rem;
-	background-color: var(--color-background, #000);
 	color: var(--color-text-primary, #fff);
-	overflow: hidden;
-	font-family: var(--font-family-sans, "AA Stetica", sans-serif);
 }
-
-.java-glow-bg {
-	position: fixed;
-	width: 300px;
-	height: 300px;
-	background: var(--color-primary-glow, #b39dff);
-	border-radius: 50%;
-	filter: blur(var(--blur-large, 7.5rem));
-	z-index: 0;
-	opacity: 0.15;
-	pointer-events: none;
-}
-
-.java-glow-bg.sphere1 {
-	top: 10vh;
-	left: 10vw;
-	animation: move-sphere1 25s infinite alternate ease-in-out;
-}
-
-.java-glow-bg.sphere2 {
-	bottom: 5vh;
-	right: 15vw;
-	animation: move-sphere2 30s infinite alternate ease-in-out;
-	animation-delay: -15s;
-}
-
 
 .java-page-content {
 	z-index: 10;
@@ -54,7 +25,6 @@
 	font-weight: 700;
 	margin-bottom: 1rem;
 	color: var(--color-primary-glow, #b39dff);
-	text-shadow: 0 0 10px rgba(179, 157, 255, 0.3);
 }
 
 .subtitle-java-page {
@@ -107,40 +77,6 @@
 
 .check-button svg {
 	margin-right: 0.75rem;
-}
-
-@keyframes move-sphere1 {
-	0% {
-		transform: translate(0, 0) scale(1);
-		opacity: 0.15;
-	}
-
-	50% {
-		transform: translate(60vw, 40vh) scale(1.2);
-		opacity: 0.25;
-	}
-
-	100% {
-		transform: translate(20vw, 70vh) scale(0.9);
-		opacity: 0.1;
-	}
-}
-
-@keyframes move-sphere2 {
-	0% {
-		transform: translate(0, 0) scale(1);
-		opacity: 0.2;
-	}
-
-	50% {
-		transform: translate(-50vw, -30vh) scale(0.8);
-		opacity: 0.1;
-	}
-
-	100% {
-		transform: translate(-10vw, -60vh) scale(1.1);
-		opacity: 0.22;
-	}
 }
 
 .animate-spin {

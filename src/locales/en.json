@@ -5,6 +5,15 @@
 		"back": "Back",
 		"title": "Lumi Servers Manager",
 		"version": "Version {{version}}",
+		"welcome": {
+			"title": "Welcome!",
+			"subtitle": "The installer is ready to work."
+		},
+		"settings": {
+			"title": "Settings",
+			"language": "Language",
+			"scale": "Application Scale"
+		},
 		"where_java": {
 			"title": "Seems... You don't have Java installed?",
 			"java_not_found": "JDK {{version}} not found!",
