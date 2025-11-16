@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { FaWindows } from "react-icons/fa";
 import { openUrl as open } from "@tauri-apps/plugin-opener";
 import { WindowsInstructionsProps } from "../../types/java";
+import "./WindowsInstructions.css";
 
 const WindowsInstructions: React.FC<WindowsInstructionsProps> = ({ config }) => {
 	const { t } = useTranslation();

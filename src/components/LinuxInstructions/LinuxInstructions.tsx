@@ -8,6 +8,7 @@ import {
 	SiNixos,
 } from "react-icons/si";
 import { FaLinux } from "react-icons/fa";
+import "./LinuxInstructions.css";
 
 type LinuxDistro = "ubuntu" | "fedora" | "arch" | "nixos";
 
