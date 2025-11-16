@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { invoke } from "@tauri-apps/api/core";
+import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
+
 import SplashScreen from "./pages/splash/SplashScreen";
 import WelcomeStep from "./pages/welcome/WelcomeStep";
 import WhereJavaPage from "./pages/where-java/WhereJavaPage";
@@ -11,23 +13,23 @@ import "./App.css";
 
 function App() {
 	const [showSplash, setShowSplash] = useState(true);
-	const [appFlowStep, setAppFlowStep] = useState<
-		"checking" | "java-missing" | "welcome"
-	>("checking");
+	const navigate = useNavigate();
+	const location = useLocation();
 
 	const onSplashFinish = () => {
 		setShowSplash(false);
+		navigate("/checking");
 	};
 
 	useEffect(() => {
-		if (!showSplash && appFlowStep === "checking") {
+		if (!showSplash && location.pathname === "/checking") {
 			const timer = setTimeout(() => {
 				checkJava();
 			}, 100);
 
 			return () => clearTimeout(timer);
 		}
-	}, [showSplash, appFlowStep]);
+	}, [showSplash, location.pathname, navigate]);
 
 	const checkJava = async () => {
 		try {
@@ -40,13 +42,13 @@ function App() {
 			});
 
 			if (result.is_compatible) {
-				setAppFlowStep("welcome");
+				navigate("/welcome");
 			} else {
-				setAppFlowStep("java-missing");
+				navigate("/java-missing");
 			}
 		} catch (err) {
 			console.error("Не удалось проверить Java или загрузить конфиг:", err);
-			setAppFlowStep("java-missing");
+			navigate("/java-missing");
 		}
 	};
 
@@ -63,28 +65,26 @@ function App() {
 					style={{ width: "100%", height: "100%" }}
 				>
 					<AnimatePresence mode="wait">
-						{appFlowStep === "checking" && (
-							<CheckingPage key="checking" />
-						)}
-
-						{appFlowStep === "java-missing" && (
-							<WhereJavaPage
-								key="where-java"
+						<Routes location={location} key={location.pathname}>
+							<Route path="/checking" element={<CheckingPage />} />
+							<Route path="/java-missing" element={<WhereJavaPage />} />
+							<Route
+								path="/welcome"
+								element={
+									<motion.div
+										key="welcome-wrapper"
+										initial={{ opacity: 0 }}
+										animate={{ opacity: 1 }}
+										exit={{ opacity: 0, transition: { duration: 0.3 } }}
+										transition={{ duration: 0.6 }}
+										style={{ width: "100%", height: "100%" }}
+									>
+										<WelcomeStep />
+									</motion.div>
+								}
 							/>
-						)}
-
-						{appFlowStep === "welcome" && (
-							<motion.div
-								key="welcome-wrapper"
-								initial={{ opacity: 0 }}
-								animate={{ opacity: 1 }}
-								exit={{ opacity: 0, transition: { duration: 0.3 } }}
-								transition={{ duration: 0.6 }}
-								style={{ width: "100%", height: "100%" }}
-							>
-								<WelcomeStep />
-							</motion.div>
-						)}
+							<Route path="*" element={<CheckingPage />} />
+						</Routes>
 					</AnimatePresence>
 				</motion.div>
 			)}
