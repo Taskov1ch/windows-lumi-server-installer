@@ -70,6 +70,21 @@
 					}
 				}
 			}
+		},
+		"dashboard": {
+			"servers_title": "Мои Серверы",
+			"empty_title": "┐('～` )┌",
+			"empty_subtitle": "Упс... Кажется у вас нет ни одного сервера xD.",
+			"default_server_name": "Сервер Lumi",
+			"label_motd": "MOTD",
+			"label_port": "Порт",
+			"label_players": "Игроки",
+			"edit_server_title": "Редактировать сервер",
+			"status": {
+				"online": "Онлайн",
+				"offline": "Оффлайн",
+				"unknown": "Неизвестно"
+			}
 		}
 	}
 }

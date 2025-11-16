@@ -70,6 +70,21 @@
 					}
 				}
 			}
+		},
+		"dashboard": {
+			"servers_title": "My Servers",
+			"empty_title": "¯\\_(ツ)_/¯",
+			"empty_subtitle": "Oops... Looks like you don't have any servers xD.",
+			"default_server_name": "Lumi Server",
+			"label_motd": "MOTD",
+			"label_port": "Port",
+			"label_players": "Players",
+			"edit_server_title": "Edit server",
+			"status": {
+				"online": "Online",
+				"offline": "Offline",
+				"unknown": "Unknown"
+			}
 		}
 	}
 }
