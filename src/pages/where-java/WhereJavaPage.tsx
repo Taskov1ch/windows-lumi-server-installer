@@ -75,18 +75,7 @@ const WhereJavaPage = () => {
 		<div className="java-page-container">
 			<button
 				onClick={() => navigate("/settings")}
-				style={{
-					position: "fixed",
-					top: 20,
-					right: 20,
-					background: "none",
-					border: "none",
-					color: "white",
-					cursor: "pointer",
-					fontSize: "1.5rem",
-					opacity: 0.7,
-					zIndex: 10,
-				}}
+				className="settings-button"
 				title={t("settings.title")}
 			>
 				<FaCog />

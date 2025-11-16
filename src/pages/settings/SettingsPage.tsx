@@ -53,16 +53,9 @@ const SettingsPage = ({ currentScale, onScaleChange }: SettingsPageProps) => {
 			exit={{ opacity: 0 }}
 			transition={{ duration: 0.3 }}
 		>
-			<motion.button
-				onClick={() => navigate(-1)}
-				className="back-button-icon"
-				title={t("back")}
-				initial={{ scale: 1, opacity: 0 }}
-				animate={{ scale: 1, opacity: 0.7 }}
-				transition={{ delay: 0.2, duration: 0.3 }}
-			>
+			<button className="back-button" onClick={() => navigate(-1)}>
 				<FaArrowLeft />
-			</motion.button>
+			</button>
 
 			<div className="settings-content-wrapper">
 				<motion.h1
