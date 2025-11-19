@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { FaCog, FaPlus } from "react-icons/fa";
+import { FaCog, FaPlus, FaSync } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
 import Lottie from "lottie-react";
 import { invoke } from "@tauri-apps/api/core";
@@ -212,9 +212,15 @@ const DashboardPage = () => {
 			<motion.div key="list" className="server-list-wrapper" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
 				<header className="dashboard-header">
 					<h2>{t("dashboard.servers_title")} <span className="badge">{servers.length}</span></h2>
-					<button className="icon-btn add" onClick={handleAddServer} title={t("dashboard.add_server_tooltip")}>
-						<FaPlus />
-					</button>
+
+					<div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+						<button className="icon-btn" onClick={loadServers} title={t("dashboard.refresh_server_tooltip")}>
+							<FaSync />
+						</button>
+						<button className="icon-btn add" onClick={handleAddServer} title={t("dashboard.add_server_tooltip")}>
+							<FaPlus />
+						</button>
+					</div>
 				</header>
 
 				<div className="server-grid">
