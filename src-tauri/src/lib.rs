@@ -193,6 +193,60 @@ async fn check_server_status(server_path: String) -> String {
     }
 }
 
+#[tauri::command]
+fn launch_server_terminal(path: String, core_jar: String) -> Result<(), String> {
+    #[cfg(target_os = "windows")]
+    {
+        let java_cmd = format!("java -Xmx2G -Xms2G -jar \"{}\" nogui", core_jar);
+
+        let ps_script = format!(
+        "$host.UI.RawUI.WindowTitle = 'Minecraft Server'; Set-Location -Path '{}'; {}; Read-Host 'Нажмите Enter для выхода...'",
+        path,
+        java_cmd
+    );
+
+        Command::new("powershell")
+            .args(["-NoLogo", "-NoExit", "-Command", &ps_script])
+            .spawn()
+            .map_err(|e| e.to_string())?;
+    }
+
+    #[cfg(target_os = "linux")]
+    {
+        let shell_cmd = format!("cd \"{}\" && {}; exec bash", path, java_cmd);
+
+        let terminals = [
+            ("gnome-terminal", vec!["--", "bash", "-c"]),
+            ("konsole", vec!["-e", "bash", "-c"]),
+            ("xfce4-terminal", vec!["-x", "bash", "-c"]),
+            ("xterm", vec!["-e", "bash", "-c"]),
+            ("kitty", vec!["-e", "bash", "-c"]),
+            ("alacritty", vec!["-e", "bash", "-c"]),
+        ];
+
+        let mut launched = false;
+
+        for (term, args) in terminals {
+            let mut cmd = Command::new(term);
+            cmd.args(&args).arg(&shell_cmd);
+
+            if cmd.spawn().is_ok() {
+                launched = true;
+                break;
+            }
+        }
+
+        if !launched {
+            Command::new("x-terminal-emulator")
+                .args(["-e", "bash", "-c", &shell_cmd])
+                .spawn()
+                .map_err(|_| "No supported terminal emulator found. Please install gnome-terminal, konsole, or xterm.".to_string())?;
+        }
+    }
+
+    Ok(())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -203,7 +257,8 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             check_java_version,
             scan_server_folder,
-            check_server_status
+            check_server_status,
+            launch_server_terminal
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

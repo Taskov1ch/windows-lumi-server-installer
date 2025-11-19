@@ -41,7 +41,7 @@
 					"English"
 				],
 				"displayLanguageSelector": false,
-				"installerIcon": "icons/128x128.png",
+				"installerIcon": "icons/icon.ico",
 				"installMode": "both"
 			}
 		},

@@ -115,7 +115,7 @@
 		},
 		"core_selector": {
 			"title": "Select Server Core",
-			"description": "File <1>core.jar</1> not found. Please select the file to run as core:"
+			"description": "Please select the file to run as core:"
 		}
 	}
 }
