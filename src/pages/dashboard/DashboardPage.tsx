@@ -34,13 +34,6 @@ const DashboardPage = () => {
 		type: "error" | "warning";
 	}>({ isOpen: false, title: "", message: "", type: "error" });
 
-	useEffect(() => {
-		fetch("/animations/loading.json")
-			.then((res) => res.json())
-			.then((data) => setLoadingAnim(data));
-		loadServers();
-	}, []);
-
 	const showAlert = (title: string, message: string, type: "error" | "warning" = "error") => {
 		setAlert({ isOpen: true, title, message, type });
 	};
@@ -50,7 +43,6 @@ const DashboardPage = () => {
 	};
 
 	const loadServers = useCallback(async () => {
-		setIsLoading(true);
 		try {
 			const savedList = await getSavedServers();
 
@@ -103,17 +95,34 @@ const DashboardPage = () => {
 			setServers(results.filter((s): s is Server => s !== null));
 		} catch (error) {
 			console.error("Failed to load servers", error);
-		} finally {
-			setIsLoading(false);
 		}
 	}, [t]);
+
+	useEffect(() => {
+		fetch("/animations/loading.json")
+			.then((res) => res.json())
+			.then((data) => setLoadingAnim(data));
+
+		const initialLoad = async () => {
+			setIsLoading(true);
+			await loadServers();
+			setIsLoading(false);
+		};
+		initialLoad();
+
+		const refreshInterval = setInterval(() => {
+			loadServers();
+		}, 5000);
+
+		return () => clearInterval(refreshInterval);
+	}, [loadServers]);
 
 	const handleAddServer = async () => {
 		try {
 			const selected = await open({
 				directory: true,
 				multiple: false,
-				title: t("dashboard.select_server_folder", "Выберите папку сервера"),
+				title: t("dashboard.select_server_folder"),
 			});
 
 			if (selected && typeof selected === "string") {
@@ -214,9 +223,6 @@ const DashboardPage = () => {
 					<h2>{t("dashboard.servers_title")} <span className="badge">{servers.length}</span></h2>
 
 					<div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-						<button className="icon-btn" onClick={loadServers} title={t("dashboard.refresh_server_tooltip")}>
-							<FaSync />
-						</button>
 						<button className="icon-btn add" onClick={handleAddServer} title={t("dashboard.add_server_tooltip")}>
 							<FaPlus />
 						</button>
