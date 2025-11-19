@@ -1,26 +1,34 @@
 {
 	"translation": {
-		"language": "Русский",
-		"next": "Далее",
-		"back": "Назад",
-		"title": "Менеджер серверов Lumi",
-		"version": "Версия {{version}}",
+		"language": "English",
+		"next": "Next",
+		"back": "Back",
+		"common": {
+			"cancel": "Cancel",
+			"acknowledge": "Got it"
+		},
+		"errors": {
+			"server_exists": "A server with this path already exists",
+			"save_error": "Save Error"
+		},
+		"title": "Lumi Servers Manager",
+		"version": "Version {{version}}",
 		"welcome": {
-			"title": "Добро пожаловать!",
-			"subtitle": "Установщик готов к работе."
+			"title": "Welcome!",
+			"subtitle": "The installer is ready to work."
 		},
 		"settings": {
-			"title": "Настройки",
-			"language": "Язык",
-			"scale": "Масштаб приложения"
+			"title": "Settings",
+			"language": "Language",
+			"scale": "Application Scale"
 		},
 		"where_java": {
-			"title": "Кажется... У вас не установлена Java?",
-			"java_not_found": "JDK {{version}} не найден!",
-			"check_again_button": "Проверить снова",
-			"loading_config": "Загрузка инструкций...",
+			"title": "Seems... You don't have Java installed?",
+			"java_not_found": "JDK {{version}} not found!",
+			"check_again_button": "Check Again",
+			"loading_config": "Loading instructions...",
 			"windows": {
-				"title": "Для Windows",
+				"title": "For Windows",
 				"link_order": [
 					"adoptium",
 					"oracle",
@@ -29,21 +37,21 @@
 				"links": {
 					"adoptium": {
 						"name": "Adoptium Temurin (JDK 21)",
-						"description": "Рекомендуемый, полностью открытый дистрибутив OpenJDK."
+						"description": "The recommended, fully open-source OpenJDK distribution."
 					},
 					"oracle": {
 						"name": "Oracle Java (JDK 21)",
-						"description": "Официальный дистрибутив Java от Oracle."
+						"description": "Official Java distribution from Oracle."
 					},
 					"zulu": {
 						"name": "Azul Zulu (JDK 21)",
-						"description": "Проверенные, сертифицированные сборки OpenJDK."
+						"description": "Verified, certified builds of OpenJDK."
 					}
 				}
 			},
 			"linux": {
-				"title": "Для Linux",
-				"code_title": "В терминале выполните:",
+				"title": "For Linux",
+				"code_title": "Execute in terminal:",
 				"tabs": {
 					"ubuntu": "Ubuntu/Debian",
 					"fedora": "Fedora/RHEL",
@@ -64,27 +72,49 @@
 						"command": "sudo pacman -Syu jdk21-openjdk"
 					},
 					"nixos": {
-						"label": "В /etc/nixos/configuration.nix:",
+						"label": "In /etc/nixos/configuration.nix:",
 						"command": "environment.systemPackages = [ ... pkgs.openjdk21 ];",
-						"note": "Затем выполните: sudo nixos-rebuild switch"
+						"note": "Then run: sudo nixos-rebuild switch"
 					}
 				}
 			}
 		},
 		"dashboard": {
-			"servers_title": "Мои Серверы",
-			"empty_title": "┐('～` )┌",
-			"empty_subtitle": "Упс... Кажется у вас нет ни одного сервера xD.",
-			"default_server_name": "Сервер Lumi",
+			"servers_title": "My Servers",
+			"empty_title": "¯\\_(ツ)_/¯",
+			"empty_subtitle": "Oops... Looks like you don't have any servers xD.",
+			"default_server_name": "Lumi Server",
+			"add_first_server": "Add Server",
+			"select_server_folder": "Select Server Folder",
+			"add_server_tooltip": "Add Server",
+			"default_new_server": "My Server",
 			"label_motd": "MOTD",
-			"label_port": "Порт",
-			"label_players": "Игроки",
-			"edit_server_title": "Редактировать сервер",
+			"label_port": "Port",
+			"label_players": "Players",
+			"edit_server_title": "Edit server",
 			"status": {
-				"online": "Онлайн",
-				"offline": "Оффлайн",
-				"unknown": "Неизвестно"
+				"online": "Online",
+				"offline": "Offline",
+				"unknown": "Unknown"
+			},
+			"alerts": {
+				"duplicate": {
+					"title": "Duplicate",
+					"message": "This server is already in your list."
+				},
+				"not_server": {
+					"title": "Not a Server",
+					"message": "settings.yml file missing. Run the server once to generate files."
+				},
+				"no_jars": {
+					"title": "No Core Found",
+					"message": "No .jar files found in the selected folder."
+				}
 			}
+		},
+		"core_selector": {
+			"title": "Select Server Core",
+			"description": "File <1>core.jar</1> not found. Please select the file to run as core:"
 		}
 	}
 }

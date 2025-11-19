@@ -1,5 +1,9 @@
+use fs2::FileExt;
 use once_cell::sync::Lazy;
 use regex::Regex;
+use std::fs::{self, OpenOptions};
+use std::io::BufReader;
+use std::path::Path;
 use std::process::Command;
 
 #[cfg(target_os = "windows")]
@@ -67,8 +71,6 @@ async fn check_java_version(required_version_str: String) -> JavaCheckResult {
                 if major_ver >= required_major {
                     result.is_compatible = true;
                 }
-            } else {
-                eprintln!("[RUST DEBUG] Regex НЕ нашел совпадения в stderr.");
             }
         }
         Err(_) => {
@@ -79,13 +81,130 @@ async fn check_java_version(required_version_str: String) -> JavaCheckResult {
     result
 }
 
+#[derive(serde::Deserialize, Debug)]
+struct GeneralSettings {
+    motd: String,
+    #[serde(rename = "server-port")]
+    server_port: u16,
+    #[serde(rename = "max-players")]
+    max_players: u32,
+}
+
+#[derive(serde::Deserialize, Debug)]
+struct LumiConfig {
+    general: GeneralSettings,
+}
+
+#[derive(serde::Serialize, Default)]
+struct ServerInfo {
+    motd: String,
+    server_port: u16,
+    max_players: u32,
+    core_jar: String,
+}
+
+#[derive(serde::Serialize)]
+#[serde(tag = "status", content = "data")]
+#[allow(dead_code)]
+enum ScanResult {
+    Valid(ServerInfo),
+    NoSettings,
+    NoJars,
+    NeedCoreSelection {
+        jars: Vec<String>,
+        config: ServerInfo,
+    },
+}
+
+#[tauri::command]
+async fn scan_server_folder(server_path: String) -> ScanResult {
+    let path = Path::new(&server_path);
+
+    let mut jar_files: Vec<String> = Vec::new();
+
+    if let Ok(entries) = fs::read_dir(path) {
+        for entry in entries.flatten() {
+            let p = entry.path();
+            if p.is_file() {
+                if let Some(ext) = p.extension() {
+                    if ext == "jar" {
+                        if let Some(name) = p.file_name() {
+                            jar_files.push(name.to_string_lossy().to_string());
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    if jar_files.is_empty() {
+        return ScanResult::NoJars;
+    }
+
+    let settings_path = path.join("settings.yml");
+
+    if !settings_path.exists() {
+        return ScanResult::NoSettings;
+    }
+
+    let file = match fs::File::open(&settings_path) {
+        Ok(f) => f,
+        Err(_) => return ScanResult::NoSettings,
+    };
+    let reader = BufReader::new(file);
+
+    let config: LumiConfig = match serde_yaml::from_reader(reader) {
+        Ok(c) => c,
+        Err(e) => {
+            println!("YAML Parse Error: {:?}", e);
+            return ScanResult::NoSettings;
+        }
+    };
+
+    let server_info = ServerInfo {
+        motd: config.general.motd,
+        server_port: config.general.server_port,
+        max_players: config.general.max_players,
+        core_jar: String::new(),
+    };
+
+    ScanResult::NeedCoreSelection {
+        jars: jar_files,
+        config: server_info,
+    }
+}
+
+#[tauri::command]
+async fn check_server_status(server_path: String) -> String {
+    let path = Path::new(&server_path).join("players").join("LOCK");
+
+    if !path.exists() {
+        return "unknown".to_string();
+    }
+
+    let file = match OpenOptions::new().write(true).open(&path) {
+        Ok(f) => f,
+        Err(_) => return "unknown".to_string(),
+    };
+
+    match file.try_lock_exclusive() {
+        Ok(_) => "offline".to_string(),
+        Err(_) => "online".to_string(),
+    }
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_store::Builder::new().build())
         .plugin(tauri_plugin_os::init())
         .plugin(tauri_plugin_opener::init())
-        .invoke_handler(tauri::generate_handler![check_java_version])
+        .invoke_handler(tauri::generate_handler![
+            check_java_version,
+            scan_server_folder,
+            check_server_status
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
