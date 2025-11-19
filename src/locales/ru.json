@@ -1,34 +1,34 @@
 {
 	"translation": {
-		"language": "English",
-		"next": "Next",
-		"back": "Back",
+		"language": "Русский",
+		"next": "Далее",
+		"back": "Назад",
 		"common": {
-			"cancel": "Cancel",
-			"acknowledge": "Got it"
+			"cancel": "Отмена",
+			"acknowledge": "Понятно"
 		},
 		"errors": {
-			"server_exists": "A server with this path already exists",
-			"save_error": "Save Error"
+			"server_exists": "Сервер с таким путем уже существует",
+			"save_error": "Ошибка сохранения"
 		},
-		"title": "Lumi Servers Manager",
-		"version": "Version {{version}}",
+		"title": "Менеджер серверов Lumi",
+		"version": "Версия {{version}}",
 		"welcome": {
-			"title": "Welcome!",
-			"subtitle": "The installer is ready to work."
+			"title": "Добро пожаловать!",
+			"subtitle": "Установщик готов к работе."
 		},
 		"settings": {
-			"title": "Settings",
-			"language": "Language",
-			"scale": "Application Scale"
+			"title": "Настройки",
+			"language": "Язык",
+			"scale": "Масштаб приложения"
 		},
 		"where_java": {
-			"title": "Seems... You don't have Java installed?",
-			"java_not_found": "JDK {{version}} not found!",
-			"check_again_button": "Check Again",
-			"loading_config": "Loading instructions...",
+			"title": "Кажется... У вас не установлена Java?",
+			"java_not_found": "JDK {{version}} не найден!",
+			"check_again_button": "Проверить снова",
+			"loading_config": "Загрузка инструкций...",
 			"windows": {
-				"title": "For Windows",
+				"title": "Для Windows",
 				"link_order": [
 					"adoptium",
 					"oracle",
@@ -37,21 +37,21 @@
 				"links": {
 					"adoptium": {
 						"name": "Adoptium Temurin (JDK 21)",
-						"description": "The recommended, fully open-source OpenJDK distribution."
+						"description": "Рекомендуемый, полностью открытый дистрибутив OpenJDK."
 					},
 					"oracle": {
 						"name": "Oracle Java (JDK 21)",
-						"description": "Official Java distribution from Oracle."
+						"description": "Официальный дистрибутив Java от Oracle."
 					},
 					"zulu": {
 						"name": "Azul Zulu (JDK 21)",
-						"description": "Verified, certified builds of OpenJDK."
+						"description": "Проверенные, сертифицированные сборки OpenJDK."
 					}
 				}
 			},
 			"linux": {
-				"title": "For Linux",
-				"code_title": "Execute in terminal:",
+				"title": "Для Linux",
+				"code_title": "В терминале выполните:",
 				"tabs": {
 					"ubuntu": "Ubuntu/Debian",
 					"fedora": "Fedora/RHEL",
@@ -72,49 +72,50 @@
 						"command": "sudo pacman -Syu jdk21-openjdk"
 					},
 					"nixos": {
-						"label": "In /etc/nixos/configuration.nix:",
+						"label": "В /etc/nixos/configuration.nix:",
 						"command": "environment.systemPackages = [ ... pkgs.openjdk21 ];",
-						"note": "Then run: sudo nixos-rebuild switch"
+						"note": "Затем выполните: sudo nixos-rebuild switch"
 					}
 				}
 			}
 		},
 		"dashboard": {
-			"servers_title": "My Servers",
-			"empty_title": "¯\\_(ツ)_/¯",
-			"empty_subtitle": "Oops... Looks like you don't have any servers xD.",
-			"default_server_name": "Lumi Server",
-			"add_first_server": "Add Server",
-			"select_server_folder": "Select Server Folder",
-			"add_server_tooltip": "Add Server",
-			"default_new_server": "My Server",
+			"servers_title": "Мои Серверы",
+			"empty_title": "┐('～` )┌",
+			"empty_subtitle": "Упс... Кажется у вас нет ни одного сервера xD.",
+			"default_server_name": "Сервер Lumi",
+			"add_first_server": "Добавить сервер",
+			"select_server_folder": "Выберите папку сервера",
+			"add_server_tooltip": "Добавить сервер",
+			"default_new_server": "Мой сервер",
 			"label_motd": "MOTD",
-			"label_port": "Port",
-			"label_players": "Players",
-			"edit_server_title": "Edit server",
+			"label_port": "Порт",
+			"label_players": "Игроки",
+			"edit_server_title": "Редактировать сервер",
+			"refresh_server_tooltip": "Обновить список",
 			"status": {
-				"online": "Online",
-				"offline": "Offline",
-				"unknown": "Unknown"
+				"online": "Онлайн",
+				"offline": "Оффлайн",
+				"unknown": "Неизвестно"
 			},
 			"alerts": {
 				"duplicate": {
-					"title": "Duplicate",
-					"message": "This server is already in your list."
+					"title": "Дубликат",
+					"message": "Этот сервер уже добавлен в ваш список."
 				},
 				"not_server": {
-					"title": "Not a Server",
-					"message": "settings.yml file missing. Run the server once to generate files."
+					"title": "Не является сервером",
+					"message": "В папке отсутствует файл settings.yml. Запустите сервер один раз для генерации файлов."
 				},
 				"no_jars": {
-					"title": "No Core Found",
-					"message": "No .jar files found in the selected folder."
+					"title": "Нет ядра",
+					"message": "В выбранной папке не найдено ни одного .jar файла."
 				}
 			}
 		},
 		"core_selector": {
-			"title": "Select Server Core",
-			"description": "File <1>core.jar</1> not found. Please select the file to run as core:"
+			"title": "Выбор ядра сервера",
+			"description": "Файл <1>core.jar</1> не найден. Пожалуйста, выберите файл, который будет запускаться как ядро:"
 		}
 	}
 }
