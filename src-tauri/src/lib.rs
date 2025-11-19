@@ -194,26 +194,32 @@ async fn check_server_status(server_path: String) -> String {
 }
 
 #[tauri::command]
-fn launch_server_terminal(path: String, core_jar: String) -> Result<(), String> {
+async fn launch_server_terminal(path: String, core_jar: String) -> Result<u32, String> {
     #[cfg(target_os = "windows")]
     {
         let java_cmd = format!("java -Xmx2G -Xms2G -jar \"{}\" nogui", core_jar);
 
         let ps_script = format!(
-        "$host.UI.RawUI.WindowTitle = 'Minecraft Server'; Set-Location -Path '{}'; {}; Read-Host 'Нажмите Enter для выхода...'",
-        path,
-        java_cmd
-    );
+            "$host.UI.RawUI.WindowTitle = 'Minecraft Server'; Set-Location -Path '{}'; {}; Read-Host 'Нажмите Enter для выхода...'",
+            path,
+            java_cmd
+        );
 
-        Command::new("powershell")
+        let child = Command::new("powershell")
             .args(["-NoLogo", "-NoExit", "-Command", &ps_script])
             .spawn()
             .map_err(|e| e.to_string())?;
+
+        Ok(child.id())
     }
 
     #[cfg(target_os = "linux")]
     {
-        let shell_cmd = format!("cd \"{}\" && {}; exec bash", path, java_cmd);
+        let shell_cmd = format!(
+            "cd \"{}\" && {}; exec bash",
+            path,
+            format!("java -Xmx2G -Xms2G -jar \"{}\" nogui", core_jar)
+        );
 
         let terminals = [
             ("gnome-terminal", vec!["--", "bash", "-c"]),
@@ -224,23 +230,50 @@ fn launch_server_terminal(path: String, core_jar: String) -> Result<(), String> 
             ("alacritty", vec!["-e", "bash", "-c"]),
         ];
 
-        let mut launched = false;
-
         for (term, args) in terminals {
             let mut cmd = Command::new(term);
             cmd.args(&args).arg(&shell_cmd);
 
-            if cmd.spawn().is_ok() {
-                launched = true;
-                break;
+            if let Ok(child) = cmd.spawn() {
+                return Ok(child.id());
             }
         }
 
-        if !launched {
-            Command::new("x-terminal-emulator")
-                .args(["-e", "bash", "-c", &shell_cmd])
-                .spawn()
-                .map_err(|_| "No supported terminal emulator found. Please install gnome-terminal, konsole, or xterm.".to_string())?;
+        let child = Command::new("x-terminal-emulator")
+            .args(["-e", "bash", "-c", &shell_cmd])
+            .spawn()
+            .map_err(|_| "No supported terminal emulator found.".to_string())?;
+
+        Ok(child.id())
+    }
+}
+
+#[tauri::command]
+async fn stop_server(pid: u32) -> Result<(), String> {
+    println!("Force killing server process with PID: {}", pid);
+
+    #[cfg(target_os = "windows")]
+    {
+        let output = Command::new("taskkill")
+            .args(["/PID", &pid.to_string(), "/F", "/T"])
+            .output()
+            .map_err(|e| e.to_string())?;
+
+        if !output.status.success() {
+            let stderr = String::from_utf8_lossy(&output.stderr);
+            println!(
+                "Taskkill warning (process might be already dead): {}",
+                stderr
+            );
+        }
+    }
+
+    #[cfg(target_os = "linux")]
+    {
+        let output = Command::new("kill").args(["-9", &pid.to_string()]).output();
+
+        if let Err(e) = output {
+            println!("Kill command failed (process might be already dead): {}", e);
         }
     }
 
@@ -258,7 +291,8 @@ pub fn run() {
             check_java_version,
             scan_server_folder,
             check_server_status,
-            launch_server_terminal
+            launch_server_terminal,
+            stop_server
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

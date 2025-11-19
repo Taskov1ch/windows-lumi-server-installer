@@ -24,3 +24,9 @@ export type ScanResult =
 	| { status: "Valid"; data: RustServerConfig }
 	| { status: "NeedCoreSelection"; data: { jars: string[]; config: RustServerConfig } }
 	| { status: "NoSettings" | "NoJars" };
+
+export interface RunningServerState {
+	pid: number | null;
+	isRunning: boolean;
+	isStopping: boolean;
+}

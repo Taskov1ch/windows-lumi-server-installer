@@ -9,7 +9,8 @@
 		},
 		"errors": {
 			"server_exists": "A server with this path already exists",
-			"save_error": "Save Error"
+			"save_error": "Save Error",
+			"action_failed": "Action Failed"
 		},
 		"title": "Lumi Servers Manager",
 		"version": "Version {{version}}",
@@ -93,6 +94,13 @@
 			"label_players": "Players",
 			"edit_server_title": "Edit server",
 			"refresh_server_tooltip": "Refresh List",
+			"start_server": "Start Server",
+			"stop_server": "Stop Server",
+			"start_action": "Run",
+			"kill_action": "Kill",
+			"loading": "Loading...",
+			"external": "External",
+			"external_tooltip": "Server running outside launcher (PID unknown)",
 			"status": {
 				"online": "Online",
 				"offline": "Offline",
@@ -110,7 +118,18 @@
 				"no_jars": {
 					"title": "No Core Found",
 					"message": "No .jar files found in the selected folder."
+				},
+				"external_process": {
+					"title": "Process Unavailable",
+					"message": "This server is running externally or its PID was lost. Stop it manually via server console or task manager."
 				}
+			},
+			"modal_kill": {
+				"title": "Force Stop",
+				"description": "You are about to force kill the server process. This is UNSAFE.",
+				"warning": "Data will not be saved (inventories, builds, etc.). It is recommended to use the 'stop' command or CTRL+C in the server console.",
+				"confirm": "Kill Anyway",
+				"cancel": "Cancel"
 			}
 		},
 		"core_selector": {

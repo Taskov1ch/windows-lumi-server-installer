@@ -17,6 +17,57 @@
 	display: flex;
 	flex-direction: column;
 	gap: 4px;
+
+	.server-item {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: 15px;
+		background: rgba(255, 255, 255, 0.05);
+		border-radius: 8px;
+		border: 1px solid rgba(255, 255, 255, 0.1);
+		transition: all 0.3s ease;
+	}
+
+	.server-item.running {
+		border-color: rgba(46, 204, 113, 0.5);
+		background: rgba(46, 204, 113, 0.05);
+	}
+
+	.toggle-btn {
+		padding: 10px 24px;
+		border-radius: 6px;
+		border: none;
+		font-weight: bold;
+		cursor: pointer;
+		transition: all 0.2s;
+		min-width: 120px;
+	}
+
+	.toggle-btn.start {
+		background-color: #2ecc71;
+		color: white;
+	}
+
+	.toggle-btn.start:hover {
+		background-color: #27ae60;
+	}
+
+	.toggle-btn.stop {
+		background-color: #e74c3c;
+		color: white;
+	}
+
+	.toggle-btn.stop:hover {
+		background-color: #c0392b;
+	}
+
+	.toggle-btn:disabled {
+		opacity: 0.7;
+		cursor: not-allowed;
+		background-color: #95a5a6;
+	}
+
 	overflow: hidden;
 	flex: 1;
 }
@@ -113,6 +164,9 @@
 
 .server-actions {
 	margin-left: 20px;
+	display: flex;
+	gap: 10px;
+	align-items: center;
 }
 
 .server-edit-button {
@@ -130,4 +184,60 @@
 .server-edit-button:hover {
 	opacity: 1;
 	transform: scale(1.1);
+}
+
+.toggle-btn {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 8px 16px;
+	border-radius: 6px;
+	border: none;
+	font-weight: 600;
+	cursor: pointer;
+	transition: all 0.2s ease;
+	font-size: 0.9rem;
+}
+
+.toggle-btn:disabled {
+	opacity: 0.7;
+	cursor: not-allowed;
+	background-color: #4a5568;
+	color: #cbd5e0;
+}
+
+.toggle-btn.start {
+	background-color: #38a169;
+	color: white;
+}
+
+.toggle-btn.start:hover:not(:disabled) {
+	background-color: #2f855a;
+}
+
+.toggle-btn.stop {
+	background-color: #e53e3e;
+	color: white;
+}
+
+.toggle-btn.stop:hover:not(:disabled) {
+	background-color: #c53030;
+}
+
+.icon-spin {
+	animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+	from {
+		transform: rotate(0deg);
+	}
+
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+.server-item.running-border {
+	border-left: 4px solid #38a169;
 }

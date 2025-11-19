@@ -1,0 +1,92 @@
+.kill-modal-overlay {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background: rgba(0, 0, 0, 0.7);
+	backdrop-filter: blur(4px);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	z-index: 2000;
+}
+
+.kill-modal-content {
+	background: #1e1e1e;
+	border: 1px solid #333;
+	border-radius: 12px;
+	width: 90%;
+	max-width: 450px;
+	padding: 24px;
+	box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+	color: #fff;
+}
+
+.kill-header {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	margin-bottom: 16px;
+	color: #e74c3c;
+}
+
+.warning-icon {
+	font-size: 1.5rem;
+}
+
+.kill-body p {
+	margin-bottom: 12px;
+	line-height: 1.5;
+	color: #ccc;
+}
+
+.warning-box {
+	background: rgba(231, 76, 60, 0.1);
+	border-left: 4px solid #e74c3c;
+	padding: 12px;
+	border-radius: 4px;
+	margin: 16px 0 24px 0;
+}
+
+.warning-box p {
+	margin: 0;
+	font-size: 0.9rem;
+	color: #ffadad;
+}
+
+.kill-actions {
+	display: flex;
+	justify-content: flex-end;
+	gap: 12px;
+}
+
+.kill-actions button {
+	padding: 10px 20px;
+	border-radius: 6px;
+	border: none;
+	font-weight: 600;
+	cursor: pointer;
+	transition: all 0.2s;
+}
+
+.cancel-btn {
+	background: #333;
+	color: #fff;
+}
+
+.cancel-btn:hover {
+	background: #444;
+}
+
+.kill-btn {
+	background: #e74c3c;
+	color: #fff;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.kill-btn:hover {
+	background: #c0392b;
+}
