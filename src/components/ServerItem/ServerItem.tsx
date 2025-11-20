@@ -54,7 +54,7 @@ const ServerItemComponent = ({ server, isRunning, isLoading, isExternal, onToggl
 	}
 
 	return (
-		<div className={`server-item ${isRunning ? 'running-border' : ''}`}>
+		<div className={`server-item ${isRunning ? "running-border" : ""}`}>
 			<div className="server-info">
 				<h3 className="server-name">
 					<div
@@ -95,9 +95,10 @@ const ServerItemComponent = ({ server, isRunning, isLoading, isExternal, onToggl
 				</button>
 
 				<button
-					className="server-edit-button"
-					title={t("dashboard.edit_server_title", "Edit")}
+					className={`server-edit-button ${isRunning ? "disabled" : ""}`}
+					title={t("dashboard.edit_server_title")}
 					onClick={handleEditClick}
+					disabled={isRunning || isExternal || isLoading}
 				>
 					<FaPencilAlt />
 				</button>

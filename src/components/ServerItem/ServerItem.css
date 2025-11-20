@@ -181,7 +181,12 @@
 	transition: opacity 0.2s ease;
 }
 
-.server-edit-button:hover {
+.server-edit-button:disabled {
+	opacity: 0.3;
+	cursor: not-allowed;
+}
+
+.server-edit-button:hover:not(:disabled) {
 	opacity: 1;
 	transform: scale(1.1);
 }
