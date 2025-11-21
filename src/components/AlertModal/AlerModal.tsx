@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
+import { FaExclamationCircle, FaExclamationTriangle, FaInfoCircle } from "react-icons/fa";
 import "./AlertModal.css";
 
 export const AlertModal = ({
@@ -12,30 +13,47 @@ export const AlertModal = ({
 	isOpen: boolean;
 	title: string;
 	message: string;
-	type?: "error" | "warning";
+	type?: "error" | "warning" | "info";
 	onClose: () => void;
 }) => {
 	const { t } = useTranslation();
 
 	if (!isOpen) return null;
 
+	let Icon = FaExclamationCircle;
+	let iconClass = "error";
+
+	if (type === "warning") {
+		Icon = FaExclamationTriangle;
+		iconClass = "warning";
+	} else if (type === "info") {
+		Icon = FaInfoCircle;
+		iconClass = "info";
+	}
+
 	return (
-		<div className="modal-backdrop" onClick={onClose}>
+		<div className="alert-modal-overlay" onClick={onClose}>
 			<motion.div
-				className={`modal-container alert-type-${type}`}
-				initial={{ scale: 0.9, opacity: 0, y: 20 }}
-				animate={{ scale: 1, opacity: 1, y: 0 }}
-				exit={{ scale: 0.9, opacity: 0, y: 20 }}
+				className="alert-modal-content"
+				initial={{ scale: 0.9, opacity: 0 }}
+				animate={{ scale: 1, opacity: 1 }}
+				exit={{ scale: 0.9, opacity: 0 }}
 				onClick={(e) => e.stopPropagation()}
 			>
-				<div className="modal-icon">
-					<img src="/images/1.svg" alt="Alert Icon" className="alert-svg-icon" />
+				<div className={`alert-header ${iconClass}`}>
+					<Icon className="alert-icon" />
+					<h3>{title}</h3>
 				</div>
-				<h3 className="modal-title">{title}</h3>
-				<p className="modal-message">{message}</p>
-				<button className="modal-btn primary" onClick={onClose}>
-					{t("common.acknowledge")}
-				</button>
+
+				<div className="alert-body">
+					<p className="alert-message">{message}</p>
+				</div>
+
+				<div className="alert-actions">
+					<button className="alert-btn primary" onClick={onClose}>
+						{t("common.acknowledge")}
+					</button>
+				</div>
 			</motion.div>
 		</div>
 	);

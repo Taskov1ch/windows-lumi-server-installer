@@ -101,6 +101,8 @@
 			"loading": "Loading...",
 			"external": "External",
 			"external_tooltip": "Server running outside launcher (PID unknown)",
+			"confirm_delete": "Confirm Delete",
+			"delete_server": "Delete Server",
 			"status": {
 				"online": "Online",
 				"offline": "Offline",
@@ -130,6 +132,27 @@
 				"warning": "Data will not be saved (inventories, builds, etc.). It is recommended to use the 'stop' command or CTRL+C in the server console.",
 				"confirm": "Kill Anyway",
 				"cancel": "Cancel"
+			},
+			"modal_delete": {
+				"title": "Delete Server",
+				"description": "Are you sure you want to remove this server from the list?",
+				"warning": "Server files will remain on the disk, but the launcher configuration will be permanently deleted.",
+				"confirm": "Delete",
+				"cancel": "Cancel"
+			},
+			"modal_error_log": {
+				"title": "Scan Error",
+				"description": "Failed to add server. An error occurred while processing the folder:",
+				"copy": "Copy Error",
+				"close": "Close"
+			},
+			"errors": {
+				"server_exists": "A server with this path already exists",
+				"save_error": "Save Error",
+				"action_failed": "Action Failed",
+				"settings_missing": "Settings file (settings.yml) not found",
+				"core_missing": "Core file ({{core}}) is missing",
+				"no_jars": "No jar files found in folder"
 			}
 		},
 		"core_selector": {

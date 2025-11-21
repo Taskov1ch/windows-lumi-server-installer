@@ -2,7 +2,6 @@ use fs2::FileExt;
 use once_cell::sync::Lazy;
 use regex::Regex;
 use std::fs::{self, OpenOptions};
-use std::io::BufReader;
 use std::path::Path;
 use std::process::Command;
 
@@ -95,7 +94,7 @@ struct LumiConfig {
     general: GeneralSettings,
 }
 
-#[derive(serde::Serialize, Default)]
+#[derive(serde::Serialize, Default, Clone)]
 struct ServerInfo {
     motd: String,
     server_port: u16,
@@ -107,7 +106,10 @@ struct ServerInfo {
 #[serde(tag = "status", content = "data")]
 #[allow(dead_code)]
 enum ScanResult {
-    Valid(ServerInfo),
+    Valid {
+        config: ServerInfo,
+        jars: Vec<String>,
+    },
     NoSettings,
     NoJars,
     NeedCoreSelection {
@@ -117,20 +119,23 @@ enum ScanResult {
 }
 
 #[tauri::command]
-async fn scan_server_folder(server_path: String) -> ScanResult {
+async fn scan_server_folder(server_path: String) -> Result<ScanResult, String> {
     let path = Path::new(&server_path);
 
     let mut jar_files: Vec<String> = Vec::new();
 
-    if let Ok(entries) = fs::read_dir(path) {
-        for entry in entries.flatten() {
-            let p = entry.path();
-            if p.is_file() {
-                if let Some(ext) = p.extension() {
-                    if ext == "jar" {
-                        if let Some(name) = p.file_name() {
-                            jar_files.push(name.to_string_lossy().to_string());
-                        }
+    if !path.exists() {
+        return Ok(ScanResult::NoSettings);
+    }
+
+    let entries = fs::read_dir(path).map_err(|e| format!("Read dir error: {}", e))?;
+    for entry in entries.flatten() {
+        let p = entry.path();
+        if p.is_file() {
+            if let Some(ext) = p.extension().and_then(|s| s.to_str()) {
+                if ext.eq_ignore_ascii_case("jar") {
+                    if let Some(name) = p.file_name().and_then(|n| n.to_str()) {
+                        jar_files.push(name.to_string());
                     }
                 }
             }
@@ -138,28 +143,20 @@ async fn scan_server_folder(server_path: String) -> ScanResult {
     }
 
     if jar_files.is_empty() {
-        return ScanResult::NoJars;
+        return Ok(ScanResult::NoJars);
     }
 
     let settings_path = path.join("settings.yml");
 
     if !settings_path.exists() {
-        return ScanResult::NoSettings;
+        return Ok(ScanResult::NoSettings);
     }
 
-    let file = match fs::File::open(&settings_path) {
-        Ok(f) => f,
-        Err(_) => return ScanResult::NoSettings,
-    };
-    let reader = BufReader::new(file);
+    let content = fs::read_to_string(&settings_path)
+        .map_err(|e| format!("Failed to read settings.yml: {}", e))?;
 
-    let config: LumiConfig = match serde_yaml::from_reader(reader) {
-        Ok(c) => c,
-        Err(e) => {
-            println!("YAML Parse Error: {:?}", e);
-            return ScanResult::NoSettings;
-        }
-    };
+    let config: LumiConfig =
+        serde_yaml::from_str(&content).map_err(|e| format!("YAML parse error: {}", e))?;
 
     let server_info = ServerInfo {
         motd: config.general.motd,
@@ -168,10 +165,19 @@ async fn scan_server_folder(server_path: String) -> ScanResult {
         core_jar: String::new(),
     };
 
-    ScanResult::NeedCoreSelection {
+    if jar_files.len() == 1 {
+        let mut chosen = server_info.clone();
+        chosen.core_jar = jar_files[0].clone();
+        return Ok(ScanResult::Valid {
+            config: chosen,
+            jars: jar_files,
+        });
+    }
+
+    Ok(ScanResult::NeedCoreSelection {
         jars: jar_files,
         config: server_info,
-    }
+    })
 }
 
 #[tauri::command]
@@ -195,12 +201,22 @@ async fn check_server_status(server_path: String) -> String {
 
 #[tauri::command]
 async fn launch_server_terminal(path: String, core_jar: String) -> Result<u32, String> {
+    let server_path = Path::new(&path);
+    let jar_path = server_path.join(&core_jar);
+
+    if !jar_path.exists() {
+        return Err(format!(
+            "Core file not found: {}\nPlease check server settings or select another core.",
+            jar_path.display()
+        ));
+    }
+
     #[cfg(target_os = "windows")]
     {
         let java_cmd = format!("java -Xmx2G -Xms2G -jar \"{}\" nogui", core_jar);
 
         let ps_script = format!(
-            "$host.UI.RawUI.WindowTitle = 'Minecraft Server'; Set-Location -Path '{}'; {}; Read-Host 'Нажмите Enter для выхода...'",
+            "$host.UI.RawUI.WindowTitle = 'Minecraft Server'; Set-Location -Path '{}'; {}; Read-Host 'Press Enter to exit...'",
             path,
             java_cmd
         );

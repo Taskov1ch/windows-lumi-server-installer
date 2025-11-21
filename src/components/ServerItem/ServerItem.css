@@ -246,3 +246,43 @@
 .server-item.running-border {
 	border-left: 4px solid #38a169;
 }
+
+.server-error-message {
+	color: #ff4d4d;
+	font-size: 0.9rem;
+	display: flex;
+	align-items: center;
+	margin-top: 8px;
+	font-weight: 500;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.server-delete-button {
+	background: rgba(255, 77, 77, 0.15);
+	border: 1px solid rgba(255, 77, 77, 0.3);
+	color: #ff4d4d;
+	width: 36px;
+	height: 36px;
+	border-radius: 8px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+	transition: all 0.2s;
+}
+
+.server-delete-button:hover {
+	background: rgba(255, 77, 77, 0.3);
+	transform: translateY(-1px);
+}
+
+.status-indicator.error {
+	background-color: #ff4d4d;
+	box-shadow: 0 0 8px rgba(255, 77, 77, 0.5);
+}
+
+.server-item.error-border {
+	border-left: 3px solid #ff4d4d;
+}

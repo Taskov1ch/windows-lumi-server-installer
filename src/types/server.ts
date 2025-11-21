@@ -8,9 +8,10 @@ export interface Server {
 	id: string;
 	name: string;
 	path: string;
-	status: "online" | "offline" | "unknown";
+	status: "online" | "offline" | "unknown" | "error";
 	coreJar: string;
 	settings: ServerSettings;
+	errorMessage?: string;
 }
 
 export interface RustServerConfig {
@@ -21,7 +22,7 @@ export interface RustServerConfig {
 }
 
 export type ScanResult =
-	| { status: "Valid"; data: RustServerConfig }
+	| { status: "Valid"; data: { config: RustServerConfig; jars: string[] } }
 	| { status: "NeedCoreSelection"; data: { jars: string[]; config: RustServerConfig } }
 	| { status: "NoSettings" | "NoJars" };
 

@@ -9,11 +9,14 @@ import { open } from "@tauri-apps/plugin-dialog";
 
 import { Server, ScanResult, RustServerConfig } from "../../types/server";
 import ServerItem from "../../components/ServerItem/ServerItem";
-import { getSavedServers, addSavedServer, SavedServer } from "../../utils/storeServers";
+import { getSavedServers, addSavedServer, removeSavedServer, SavedServer } from "../../utils/storeServers";
 import "./DashboardPage.css";
 import { AlertModal } from "../../components/AlertModal/AlerModal";
 import { CoreSelectorModal } from "../../components/CoreSelectorModal/CoreSelectorModal";
 import { KillServerModal } from "../../components/KillServerModal/KillServerModal";
+import { DeleteServerModal } from "../../components/DeleteServerModal/DeleteServerModal";
+import { ErrorLogModal } from "../../components/ErrorLogModal/ErrorLogModal";
+import { StartErrorModal } from "../../components/StartErrorModal/StartErrorModal";
 
 const DashboardPage = () => {
 	const { t } = useTranslation();
@@ -30,6 +33,18 @@ const DashboardPage = () => {
 		isOpen: false, serverId: null, pid: null
 	});
 
+	const [deleteModal, setDeleteModal] = useState<{ isOpen: boolean, serverId: string | null, serverName: string }>({
+		isOpen: false, serverId: null, serverName: ""
+	});
+
+	const [startErrorModal, setStartErrorModal] = useState<{ isOpen: boolean, error: string }>({
+		isOpen: false, error: ""
+	});
+
+	const [errorLogModal, setErrorLogModal] = useState<{ isOpen: boolean, error: string }>({
+		isOpen: false, error: ""
+	});
+
 	const [pendingPath, setPendingPath] = useState<string | null>(null);
 	const [pendingConfig, setPendingConfig] = useState<RustServerConfig | null>(null);
 	const [jarList, setJarList] = useState<string[]>([]);
@@ -39,10 +54,10 @@ const DashboardPage = () => {
 		isOpen: boolean;
 		title: string;
 		message: string;
-		type: "error" | "warning";
+		type: "error" | "warning" | "info";
 	}>({ isOpen: false, title: "", message: "", type: "error" });
 
-	const showAlert = (title: string, message: string, type: "error" | "warning" = "error") => {
+	const showAlert = (title: string, message: string, type: "error" | "warning" | "info" = "error") => {
 		setAlert({ isOpen: true, title, message, type });
 	};
 
@@ -67,44 +82,78 @@ const DashboardPage = () => {
 						serverPath: saved.path,
 					});
 
-					const statusResult = await invoke<"online" | "offline" | "unknown">("check_server_status", {
-						serverPath: saved.path,
-					});
+					if (scanResult.status === "NoSettings" || scanResult.status === "NoJars") {
+						const errorMsg = scanResult.status === "NoSettings"
+							? t("errors.settings_missing")
+							: t("errors.no_jars");
 
-					let serverData: Server | null = null;
+						return {
+							id: saved.id,
+							name: saved.name,
+							path: saved.path,
+							status: "error",
+							coreJar: saved.coreJar,
+							settings: { motd: "", "server-port": 0, "max-players": 0 },
+							errorMessage: errorMsg
+						} as Server;
+					}
 
 					if (scanResult.status === "Valid" || scanResult.status === "NeedCoreSelection") {
-						const data = scanResult.status === "Valid" ? scanResult.data : scanResult.data.config;
-						const effectiveCore = (scanResult.status === "Valid" ? scanResult.data.core_jar : null)
-							|| saved.coreJar
-							|| "core.jar";
+						const { config, jars } = scanResult.data;
 
-						serverData = {
+						const effectiveCore = saved.coreJar || "core.jar";
+
+						if (!jars.includes(effectiveCore)) {
+							return {
+								id: saved.id,
+								name: saved.name,
+								path: saved.path,
+								status: "error",
+								coreJar: effectiveCore,
+								settings: { motd: config.motd, "server-port": config.server_port, "max-players": config.max_players },
+								errorMessage: t("errors.core_missing", { core: effectiveCore })
+							} as Server;
+						}
+
+						const statusResult = await invoke<"online" | "offline" | "unknown">("check_server_status", {
+							serverPath: saved.path,
+						});
+
+						return {
 							id: saved.id,
 							name: saved.name,
 							path: saved.path,
 							status: statusResult,
 							coreJar: effectiveCore,
 							settings: {
-								motd: data.motd,
-								"server-port": data.server_port,
-								"max-players": data.max_players,
+								motd: config.motd,
+								"server-port": config.server_port,
+								"max-players": config.max_players,
 							},
 						} as Server;
-					} else {
-						serverData = {
-							id: saved.id,
-							name: saved.name,
-							path: saved.path,
-							status: "unknown",
-							coreJar: saved.coreJar || "core.jar",
-							settings: { motd: t("dashboard.status.unknown"), "server-port": 0, "max-players": 0 },
-						} as Server;
 					}
-					return serverData;
-				} catch (e) {
+
+					return {
+						id: saved.id,
+						name: saved.name,
+						path: saved.path,
+						status: "error",
+						coreJar: saved.coreJar,
+						settings: { motd: "", "server-port": 0, "max-players": 0 },
+						errorMessage: "Unknown Scan Status"
+					} as Server;
+
+				} catch (e: any) {
 					console.error("Error parsing server:", e);
-					return null;
+					return {
+						id: saved.id,
+						name: saved.name,
+						path: saved.path,
+						status: "error",
+						coreJar: saved.coreJar,
+						settings: { motd: "", "server-port": 0, "max-players": 0 },
+						errorMessage: typeof e === "string" ? e : (e.message || JSON.stringify(e))
+					} as Server;
 				}
 			});
 
@@ -123,7 +172,7 @@ const DashboardPage = () => {
 						setLoadingStates(prev => ({ ...prev, [server.id]: false }));
 					}
 
-					if (server.status === "offline" && !isLoading && newPids[server.id]) {
+					if ((server.status === "offline" || server.status === "error") && !isLoading && newPids[server.id]) {
 						delete newPids[server.id];
 						changed = true;
 					}
@@ -161,7 +210,7 @@ const DashboardPage = () => {
 	}, [loadServers]);
 
 	const handleServerToggle = async (server: Server) => {
-		if (loadingStates[server.id]) return;
+		if (loadingStates[server.id] || server.status === "error") return;
 
 		if (server.status === "online" && runningPids[server.id]) {
 			setKillModal({ isOpen: true, serverId: server.id, pid: runningPids[server.id] });
@@ -182,8 +231,30 @@ const DashboardPage = () => {
 
 		} catch (error: any) {
 			console.error("Launch error:", error);
+			setStartErrorModal({
+				isOpen: true,
+				error: typeof error === "string" ? error : (error.message || JSON.stringify(error))
+			});
+
 			setLoadingStates(prev => ({ ...prev, [server.id]: false }));
-			showAlert(t("errors.action_failed"), error.toString(), "error");
+		}
+	};
+
+	const handleDeleteClick = (id: string, name: string) => {
+		setDeleteModal({ isOpen: true, serverId: id, serverName: name });
+	};
+
+	const confirmDeleteServer = async () => {
+		const { serverId } = deleteModal;
+		if (!serverId) return;
+
+		try {
+			await removeSavedServer(serverId);
+			await loadServers();
+			setDeleteModal({ isOpen: false, serverId: null, serverName: "" });
+		} catch (e: any) {
+			showAlert(t("errors.action_failed"), e.toString(), "error");
+			setDeleteModal({ isOpen: false, serverId: null, serverName: "" });
 		}
 	};
 
@@ -221,7 +292,13 @@ const DashboardPage = () => {
 				}
 				await processNewServerFolder(selected);
 			}
-		} catch (err) { console.error(err); }
+		} catch (err: any) {
+			console.error("Add server error:", err);
+			setErrorLogModal({
+				isOpen: true,
+				error: typeof err === "string" ? err : (err.message || JSON.stringify(err))
+			});
+		}
 	};
 
 	const processNewServerFolder = async (path: string) => {
@@ -230,7 +307,7 @@ const DashboardPage = () => {
 			case "NoSettings": showAlert(t("dashboard.alerts.not_server.title"), t("dashboard.alerts.not_server.message"), "error"); break;
 			case "NoJars": showAlert(t("dashboard.alerts.no_jars.title"), t("dashboard.alerts.no_jars.message"), "error"); break;
 			case "NeedCoreSelection": setPendingPath(path); setPendingConfig(result.data.config); setJarList(result.data.jars); setShowCoreSelector(true); break;
-			case "Valid": await finalizeAddServer(path, result.data.motd, result.data.core_jar); break;
+			case "Valid": await finalizeAddServer(path, result.data.config.motd, result.data.config.core_jar); break;
 		}
 	};
 
@@ -241,6 +318,7 @@ const DashboardPage = () => {
 			setShowCoreSelector(false); setPendingPath(null); setPendingConfig(null); loadServers();
 		} catch (e: any) { showAlert(t("errors.save_error"), e.toString(), "error"); }
 	};
+
 
 	const renderContent = () => {
 		if (isLoading || !loadingAnim) {
@@ -278,6 +356,10 @@ const DashboardPage = () => {
 						const hasPid = !!runningPids[server.id];
 						const isExternal = isOnline && !hasPid;
 
+						const serverName = server.name === "default.server_name"
+							? t("dashboard.default_server_name", "Lumi Server")
+							: server.name;
+
 						return (
 							<ServerItem
 								key={server.id}
@@ -286,6 +368,7 @@ const DashboardPage = () => {
 								isLoading={!!loadingStates[server.id]}
 								isExternal={isExternal}
 								onToggle={() => handleServerToggle(server)}
+								onDelete={() => handleDeleteClick(server.id, serverName)}
 							/>
 						);
 					})}
@@ -310,6 +393,31 @@ const DashboardPage = () => {
 						isOpen={killModal.isOpen}
 						onConfirm={confirmKillServer}
 						onCancel={() => setKillModal({ isOpen: false, serverId: null, pid: null })}
+					/>
+				)}
+
+				{deleteModal.isOpen && (
+					<DeleteServerModal
+						isOpen={deleteModal.isOpen}
+						serverName={deleteModal.serverName}
+						onConfirm={confirmDeleteServer}
+						onCancel={() => setDeleteModal({ isOpen: false, serverId: null, serverName: "" })}
+					/>
+				)}
+
+				{errorLogModal.isOpen && (
+					<ErrorLogModal
+						isOpen={errorLogModal.isOpen}
+						error={errorLogModal.error}
+						onClose={() => setErrorLogModal({ isOpen: false, error: "" })}
+					/>
+				)}
+
+				{startErrorModal.isOpen && (
+					<StartErrorModal
+						isOpen={startErrorModal.isOpen}
+						error={startErrorModal.error}
+						onClose={() => setStartErrorModal({ isOpen: false, error: "" })}
 					/>
 				)}
 			</AnimatePresence>

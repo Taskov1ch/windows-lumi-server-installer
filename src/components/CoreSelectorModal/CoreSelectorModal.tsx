@@ -19,32 +19,39 @@ export const CoreSelectorModal = ({
 	if (!isOpen) return null;
 
 	return (
-		<div className="modal-backdrop">
+		<div className="core-modal-overlay" onClick={onCancel}>
 			<motion.div
-				className="modal-container core-selector"
-				initial={{ scale: 0.95, opacity: 0 }}
-				animate={{ scale: 1, opacity: 1 }}
-				exit={{ scale: 0.95, opacity: 0 }}
+				className="core-modal-content"
+				onClick={(e) => e.stopPropagation()}
+				initial={{ opacity: 0, scale: 0.95 }}
+				animate={{ opacity: 1, scale: 1 }}
+				exit={{ opacity: 0, scale: 0.95 }}
 			>
-				<div className="modal-header">
-					<h3>{t("core_selector.title")}</h3>
-					<button className="icon-btn close" onClick={onCancel}>
+				<div className="core-header">
+					<div className="core-title-group">
+						<FaServer className="core-main-icon" />
+						<h3>{t("core_selector.title")}</h3>
+					</div>
+					<button className="core-close-btn" onClick={onCancel}>
 						<FaTimes />
 					</button>
 				</div>
-				<p className="modal-description">
+
+				<p className="core-description">
 					{t("core_selector.description")}
 				</p>
-				<div className="jar-list">
+
+				<div className="core-list-container">
 					{jars.map((jar) => (
-						<button key={jar} className="jar-item" onClick={() => onSelect(jar)}>
-							<FaServer className="jar-icon" />
-							<span>{jar}</span>
+						<button key={jar} className="core-item-btn" onClick={() => onSelect(jar)}>
+							<span className="jar-name">{jar}</span>
+							<span className="select-badge">Select</span>
 						</button>
 					))}
 				</div>
-				<div className="modal-footer">
-					<button className="modal-btn secondary" onClick={onCancel}>
+
+				<div className="core-actions">
+					<button className="core-cancel-btn" onClick={onCancel}>
 						{t("common.cancel")}
 					</button>
 				</div>

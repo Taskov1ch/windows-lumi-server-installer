@@ -1,70 +1,93 @@
-.modal-backdrop {
+.alert-modal-overlay {
 	position: fixed;
 	top: 0;
 	left: 0;
 	right: 0;
 	bottom: 0;
-	background: rgba(0, 0, 0, 0.3);
-	backdrop-filter: blur(8px);
-	z-index: 1000;
+	background: rgba(0, 0, 0, 0.7);
+	backdrop-filter: blur(4px);
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	padding: 20px;
+	z-index: 2100;
 }
 
-.modal-container {
-	background: #0f0f0f;
-	border: 1px solid rgba(255, 255, 255, 0.1);
-	border-radius: 20px;
+.alert-modal-content {
+	background: #1e1e1e;
+	border: 1px solid #333;
+	border-radius: 12px;
+	width: 90%;
+	max-width: 400px;
 	padding: 24px;
-	width: 100%;
-	max-width: 450px;
-	box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+	box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+	color: #fff;
 	display: flex;
 	flex-direction: column;
+	gap: 16px;
 }
 
-.modal-icon {
-	margin-bottom: 16px;
-	text-align: center;
+.alert-header {
 	display: flex;
-	justify-content: center;
 	align-items: center;
+	gap: 12px;
+	margin-bottom: 8px;
 }
 
-.alert-svg-icon {
-	width: 80px;
-	height: 80px;
+.alert-header h3 {
+	margin: 0;
+	font-size: 1.2rem;
+	font-weight: 600;
 }
 
-.modal-title {
-	text-align: center;
-	margin: 0 0 10px 0;
-	font-size: 1.4rem;
+.alert-icon {
+	font-size: 1.5rem;
 }
 
-.modal-message {
-	text-align: center;
-	color: #aaa;
-	margin-bottom: 24px;
+.alert-header.error {
+	color: #ff4d4d;
+}
+
+.alert-header.warning {
+	color: #f1c40f;
+}
+
+.alert-header.info {
+	color: #3498db;
+}
+
+.alert-body {
+	color: #ccc;
 	line-height: 1.5;
+	font-size: 0.95rem;
 }
 
-.modal-btn {
-	padding: 12px;
-	border-radius: 10px;
+.alert-message {
+	margin: 0;
+	word-wrap: break-word;
+}
+
+.alert-actions {
+	display: flex;
+	justify-content: flex-end;
+	margin-top: 8px;
+}
+
+.alert-btn {
+	padding: 10px 24px;
+	border-radius: 6px;
+	border: none;
 	font-weight: 600;
 	cursor: pointer;
 	transition: all 0.2s;
-	border: none;
 }
 
-.modal-btn.primary {
-	background: rgba(255, 255, 255, 0.1);
-	color: white;
+.alert-btn.primary {
+	background: #333;
+	color: #fff;
+	border: 1px solid #444;
 }
 
-.modal-btn.primary:hover {
-	background: rgba(255, 255, 255, 0.2);
+.alert-btn.primary:hover {
+	background: #444;
+	border-color: #555;
 }
