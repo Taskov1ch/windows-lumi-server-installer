@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { FaCog, FaPlus } from "react-icons/fa";
@@ -9,7 +9,7 @@ import { open } from "@tauri-apps/plugin-dialog";
 
 import { Server, ScanResult, RustServerConfig } from "../../types/server";
 import ServerItem from "../../components/ServerItem/ServerItem";
-import { getSavedServers, addSavedServer, removeSavedServer, SavedServer } from "../../utils/storeServers";
+import { getSavedServers, addSavedServer, removeSavedServer } from "../../utils/storeServers";
 import "./DashboardPage.css";
 import { AlertModal } from "../../components/AlertModal/AlerModal";
 import { CoreSelectorModal } from "../../components/CoreSelectorModal/CoreSelectorModal";
@@ -18,16 +18,23 @@ import { DeleteServerModal } from "../../components/DeleteServerModal/DeleteServ
 import { ErrorLogModal } from "../../components/ErrorLogModal/ErrorLogModal";
 import { StartErrorModal } from "../../components/StartErrorModal/StartErrorModal";
 
+import loadingAnimation from "../../assets/animations/loading.json";
+
 const DashboardPage = () => {
 	const { t } = useTranslation();
 	const navigate = useNavigate();
 
 	const [isLoading, setIsLoading] = useState(true);
 	const [servers, setServers] = useState<Server[]>([]);
-	const [loadingAnim, setLoadingAnim] = useState<any>(null);
 
 	const [runningPids, setRunningPids] = useState<Record<string, number>>({});
 	const [loadingStates, setLoadingStates] = useState<Record<string, boolean>>({});
+
+	const loadingStatesRef = useRef(loadingStates);
+	const runningPidsRef = useRef(runningPids);
+
+	useEffect(() => { loadingStatesRef.current = loadingStates; }, [loadingStates]);
+	useEffect(() => { runningPidsRef.current = runningPids; }, [runningPids]);
 
 	const [killModal, setKillModal] = useState<{ isOpen: boolean, serverId: string | null, pid: number | null }>({
 		isOpen: false, serverId: null, pid: null
@@ -76,103 +83,30 @@ const DashboardPage = () => {
 		try {
 			const savedList = await getSavedServers();
 
-			const serverPromises = savedList.map(async (saved: SavedServer) => {
-				try {
-					const scanResult = await invoke<ScanResult>("scan_server_folder", {
-						serverPath: saved.path,
-					});
-
-					if (scanResult.status === "NoSettings" || scanResult.status === "NoJars") {
-						const errorMsg = scanResult.status === "NoSettings"
-							? t("errors.settings_missing")
-							: t("errors.no_jars");
-
-						return {
-							id: saved.id,
-							name: saved.name,
-							path: saved.path,
-							status: "error",
-							coreJar: saved.coreJar,
-							settings: { motd: "", "server-port": 0, "max-players": 0 },
-							errorMessage: errorMsg
-						} as Server;
-					}
-
-					if (scanResult.status === "Valid" || scanResult.status === "NeedCoreSelection") {
-						const { config, jars } = scanResult.data;
-
-						const effectiveCore = saved.coreJar || "core.jar";
-
-						if (!jars.includes(effectiveCore)) {
-							return {
-								id: saved.id,
-								name: saved.name,
-								path: saved.path,
-								status: "error",
-								coreJar: effectiveCore,
-								settings: { motd: config.motd, "server-port": config.server_port, "max-players": config.max_players },
-								errorMessage: t("errors.core_missing", { core: effectiveCore })
-							} as Server;
-						}
-
-						const statusResult = await invoke<"online" | "offline" | "unknown">("check_server_status", {
-							serverPath: saved.path,
-						});
-
-						return {
-							id: saved.id,
-							name: saved.name,
-							path: saved.path,
-							status: statusResult,
-							coreJar: effectiveCore,
-							settings: {
-								motd: config.motd,
-								"server-port": config.server_port,
-								"max-players": config.max_players,
-							},
-						} as Server;
-					}
-
-					return {
-						id: saved.id,
-						name: saved.name,
-						path: saved.path,
-						status: "error",
-						coreJar: saved.coreJar,
-						settings: { motd: "", "server-port": 0, "max-players": 0 },
-						errorMessage: "Unknown Scan Status"
-					} as Server;
-
-				} catch (e: any) {
-					console.error("Error parsing server:", e);
-					return {
-						id: saved.id,
-						name: saved.name,
-						path: saved.path,
-						status: "error",
-						coreJar: saved.coreJar,
-						settings: { motd: "", "server-port": 0, "max-players": 0 },
-						errorMessage: typeof e === "string" ? e : (e.message || JSON.stringify(e))
-					} as Server;
-				}
+			const validServers = await invoke<Server[]>("scan_and_check_servers", {
+				servers: savedList
 			});
 
-			const results = await Promise.all(serverPromises);
-			const validServers = results.filter((s): s is Server => s !== null);
-			setServers(validServers);
+			setServers(prevServers => {
+				if (JSON.stringify(prevServers) !== JSON.stringify(validServers)) {
+					return validServers;
+				}
+				return prevServers;
+			});
 
-			setRunningPids(prevPids => {
-				const newPids = { ...prevPids };
+			setRunningPids(currentPids => {
+				const newPids = { ...currentPids };
 				let changed = false;
+				const currentLoadingStates = loadingStatesRef.current;
 
 				validServers.forEach(server => {
-					const isLoading = loadingStates[server.id];
+					const isServerLoading = currentLoadingStates[server.id];
 
-					if (server.status === "online" && isLoading) {
+					if (server.status === "online" && isServerLoading) {
 						setLoadingStates(prev => ({ ...prev, [server.id]: false }));
 					}
 
-					if ((server.status === "offline" || server.status === "error") && !isLoading && newPids[server.id]) {
+					if ((server.status === "offline" || server.status === "error") && !isServerLoading && newPids[server.id]) {
 						delete newPids[server.id];
 						changed = true;
 					}
@@ -182,31 +116,32 @@ const DashboardPage = () => {
 					localStorage.setItem("running_server_pids", JSON.stringify(newPids));
 					return newPids;
 				}
-				return prevPids;
+				return currentPids;
 			});
 
 		} catch (error) {
 			console.error("Failed to load servers", error);
 		}
-	}, [t, loadingStates]);
+	}, [t]);
 
 	useEffect(() => {
-		fetch("/animations/loading.json")
-			.then((res) => res.json())
-			.then((data) => setLoadingAnim(data));
+		let mounted = true;
 
-		const initialLoad = async () => {
-			setIsLoading(true);
-			await loadServers();
-			setIsLoading(false);
+		const init = async () => {
+			if (mounted) await loadServers();
+			if (mounted) setIsLoading(false);
 		};
-		initialLoad();
+
+		init();
 
 		const refreshInterval = setInterval(() => {
-			loadServers();
+			if (mounted) loadServers();
 		}, 5000);
 
-		return () => clearInterval(refreshInterval);
+		return () => {
+			mounted = false;
+			clearInterval(refreshInterval);
+		};
 	}, [loadServers]);
 
 	const handleServerToggle = async (server: Server) => {
@@ -225,9 +160,11 @@ const DashboardPage = () => {
 				coreJar: server.coreJar,
 			});
 
-			const newPids = { ...runningPids, [server.id]: pid };
-			setRunningPids(newPids);
-			localStorage.setItem("running_server_pids", JSON.stringify(newPids));
+			setRunningPids(prev => {
+				const newPids = { ...prev, [server.id]: pid };
+				localStorage.setItem("running_server_pids", JSON.stringify(newPids));
+				return newPids;
+			});
 
 		} catch (error: any) {
 			console.error("Launch error:", error);
@@ -267,11 +204,12 @@ const DashboardPage = () => {
 
 		try {
 			await invoke("stop_server", { pid: pid });
-
-			const newPids = { ...runningPids };
-			delete newPids[serverId];
-			setRunningPids(newPids);
-			localStorage.setItem("running_server_pids", JSON.stringify(newPids));
+			setRunningPids(prev => {
+				const newPids = { ...prev };
+				delete newPids[serverId];
+				localStorage.setItem("running_server_pids", JSON.stringify(newPids));
+				return newPids;
+			});
 
 			await loadServers();
 		} catch (e: any) {
@@ -321,10 +259,10 @@ const DashboardPage = () => {
 
 
 	const renderContent = () => {
-		if (isLoading || !loadingAnim) {
+		if (isLoading) {
 			return (
 				<motion.div key="loader" className="state-container" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-					<div className="loader-wrapper"><Lottie animationData={loadingAnim} loop={true} autoplay={true} /></div>
+					<div className="loader-wrapper"><Lottie animationData={loadingAnimation} loop={true} autoplay={true} /></div>
 				</motion.div>
 			);
 		}
@@ -333,9 +271,9 @@ const DashboardPage = () => {
 			return (
 				<motion.div key="empty" className="state-container empty" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}>
 					<div className="empty-content">
-						<h1>{t("dashboard.empty_title", "Здесь пусто")}</h1>
-						<p>{t("dashboard.empty_subtitle", "Добавьте свой первый сервер, чтобы начать работу")}</p>
-						<button className="main-action-btn" onClick={handleAddServer}><FaPlus /> {t("dashboard.add_first_server", "Добавить сервер")}</button>
+						<h1>{t("dashboard.empty_title")}</h1>
+						<p>{t("dashboard.empty_subtitle")}</p>
+						<button className="main-action-btn" onClick={handleAddServer}><FaPlus /> {t("dashboard.add_first_server")}</button>
 					</div>
 				</motion.div>
 			);
@@ -357,7 +295,7 @@ const DashboardPage = () => {
 						const isExternal = isOnline && !hasPid;
 
 						const serverName = server.name === "default.server_name"
-							? t("dashboard.default_server_name", "Lumi Server")
+							? t("dashboard.default_server_name")
 							: server.name;
 
 						return (

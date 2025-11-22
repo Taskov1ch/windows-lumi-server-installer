@@ -1,31 +1,26 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { motion } from "framer-motion";
 import Lottie from "lottie-react";
 import { useTranslation } from "react-i18next";
 
 import "./SplashScreen.css";
 
+import lumiLogo from "../../assets/animations/lumi_animated.json";
+
 interface SplashScreenProps {
 	onFinish?: () => void;
 }
 
 const SplashScreen = ({ onFinish }: SplashScreenProps) => {
-	const [animationData, setAnimationData] = useState(null);
 	const { t } = useTranslation();
 
 	useEffect(() => {
-		fetch("/animations/lumi_animated.json")
-			.then((res) => res.json())
-			.then((data) => setAnimationData(data));
-
 		const timer = setTimeout(() => {
 			if (onFinish) onFinish();
 		}, 2000);
 
 		return () => clearTimeout(timer);
 	}, [onFinish]);
-
-	if (!animationData) return null;
 
 	return (
 		<motion.div
@@ -50,7 +45,7 @@ const SplashScreen = ({ onFinish }: SplashScreenProps) => {
 			<div className="splash-content">
 				<div className="splash-lottie">
 					<Lottie
-						animationData={animationData}
+						animationData={lumiLogo}
 						loop={false}
 						autoplay={true}
 					/>

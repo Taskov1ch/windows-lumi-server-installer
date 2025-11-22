@@ -13,8 +13,13 @@ export interface SavedServer {
 }
 
 export const getSavedServers = async (): Promise<SavedServer[]> => {
-	const servers = await store.get<SavedServer[]>(SERVERS_KEY);
-	return servers || [];
+	try {
+		const servers = await store.get<SavedServer[]>(SERVERS_KEY);
+		return servers || [];
+	} catch (error) {
+		console.error("Failed to load servers store:", error);
+		return [];
+	}
 };
 
 export const addSavedServer = async (name: string, path: string, coreJar: string): Promise<SavedServer> => {
@@ -30,14 +35,26 @@ export const addSavedServer = async (name: string, path: string, coreJar: string
 		coreJar,
 	};
 
-	await store.set(SERVERS_KEY, [...current, newServer]);
-	await store.save();
+	try {
+		await store.set(SERVERS_KEY, [...current, newServer]);
+		await store.save();
+	} catch (error) {
+		console.error("Failed to save store:", error);
+		throw new Error(i18next.t("errors.save_failed"));
+	}
+
 	return newServer;
 };
 
 export const removeSavedServer = async (id: string) => {
 	const current = await getSavedServers();
 	const filtered = current.filter((s) => s.id !== id);
-	await store.set(SERVERS_KEY, filtered);
-	await store.save();
+
+	try {
+		await store.set(SERVERS_KEY, filtered);
+		await store.save();
+	} catch (error) {
+		console.error("Failed to save store after removal:", error);
+		throw new Error(i18next.t("errors.save_failed"));
+	}
 };

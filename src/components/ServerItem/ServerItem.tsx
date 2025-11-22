@@ -1,4 +1,4 @@
-import React, { memo } from "react";
+import React, { memo, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { Server } from "../../types/server";
 import { parseMotd } from "../../utils/minecraftFormatter";
@@ -23,7 +23,10 @@ const ServerItemComponent = ({ server, isRunning, isLoading, isExternal, onToggl
 			? t("dashboard.default_server_name", "Lumi Server")
 			: name;
 
-	const motdNodes = parseMotd(settings.motd);
+	const motdNodes = useMemo(() => {
+		return parseMotd(settings.motd);
+	}, [settings.motd]);
+
 	const isError = status === "error";
 
 	const handleEditClick = (e: React.MouseEvent) => {

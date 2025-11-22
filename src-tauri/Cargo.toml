@@ -29,4 +29,5 @@ tauri-plugin-store = "2"
 tauri-plugin-dialog = "2"
 serde_yaml = "0.9.34"
 fs2 = "0.4.3"
+rayon = "1.11.0"
 

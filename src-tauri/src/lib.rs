@@ -1,6 +1,8 @@
 use fs2::FileExt;
 use once_cell::sync::Lazy;
+use rayon::prelude::*;
 use regex::Regex;
+use serde::{Deserialize, Serialize};
 use std::fs::{self, OpenOptions};
 use std::path::Path;
 use std::process::Command;
@@ -8,7 +10,7 @@ use std::process::Command;
 #[cfg(target_os = "windows")]
 use std::os::windows::process::CommandExt;
 
-#[derive(serde::Serialize, Clone)]
+#[derive(Serialize, Clone)]
 struct JavaCheckResult {
     is_installed: bool,
     version: Option<String>,
@@ -17,8 +19,153 @@ struct JavaCheckResult {
     required_version: String,
 }
 
+#[derive(Deserialize, Debug)]
+struct GeneralSettings {
+    motd: String,
+    #[serde(rename = "server-port")]
+    server_port: u16,
+    #[serde(rename = "max-players")]
+    max_players: u32,
+}
+
+#[derive(Deserialize, Debug)]
+struct LumiConfig {
+    general: GeneralSettings,
+}
+
+#[derive(Serialize, Default, Clone)]
+struct ServerInfo {
+    motd: String,
+    server_port: u16,
+    max_players: u32,
+    core_jar: String,
+}
+
+#[derive(Serialize)]
+#[serde(tag = "status", content = "data")]
+enum ScanResult {
+    Valid {
+        config: ServerInfo,
+        jars: Vec<String>,
+    },
+    NoSettings,
+    NoJars,
+    NeedCoreSelection {
+        jars: Vec<String>,
+        config: ServerInfo,
+    },
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+struct SavedServer {
+    id: String,
+    name: String,
+    path: String,
+    #[serde(rename = "coreJar")]
+    core_jar: String,
+}
+
+#[derive(Debug, Serialize)]
+struct ResponseSettings {
+    motd: String,
+    #[serde(rename = "server-port")]
+    server_port: u16,
+    #[serde(rename = "max-players")]
+    max_players: u32,
+}
+
+#[derive(Debug, Serialize)]
+struct ServerResponse {
+    id: String,
+    name: String,
+    path: String,
+    status: String,
+    #[serde(rename = "coreJar")]
+    core_jar: String,
+    settings: ResponseSettings,
+    #[serde(rename = "errorMessage")]
+    error_message: Option<String>,
+}
+
 static JAVA_VERSION_REGEX: Lazy<Regex> =
     Lazy::new(|| Regex::new(r#"(?s).*version "(\d+)(?:.(\d+))?.*""#).unwrap());
+
+fn check_server_status_internal(server_path: &str) -> String {
+    let path = Path::new(server_path).join("players").join("LOCK");
+
+    if !path.exists() {
+        return "unknown".to_string();
+    }
+
+    let file = match OpenOptions::new().write(true).open(&path) {
+        Ok(f) => f,
+        Err(_) => return "unknown".to_string(),
+    };
+
+    match file.try_lock_exclusive() {
+        Ok(_) => "offline".to_string(),
+        Err(_) => "online".to_string(),
+    }
+}
+
+fn scan_server_folder_internal(server_path: &str) -> Result<ScanResult, String> {
+    let path = Path::new(server_path);
+    let mut jar_files: Vec<String> = Vec::new();
+
+    if !path.exists() {
+        return Ok(ScanResult::NoSettings);
+    }
+
+    let entries = fs::read_dir(path).map_err(|e| format!("Read dir error: {}", e))?;
+    for entry in entries.flatten() {
+        let p = entry.path();
+        if p.is_file() {
+            if let Some(ext) = p.extension().and_then(|s| s.to_str()) {
+                if ext.eq_ignore_ascii_case("jar") {
+                    if let Some(name) = p.file_name().and_then(|n| n.to_str()) {
+                        jar_files.push(name.to_string());
+                    }
+                }
+            }
+        }
+    }
+
+    if jar_files.is_empty() {
+        return Ok(ScanResult::NoJars);
+    }
+
+    let settings_path = path.join("settings.yml");
+    if !settings_path.exists() {
+        return Ok(ScanResult::NoSettings);
+    }
+
+    let content = fs::read_to_string(&settings_path)
+        .map_err(|e| format!("Failed to read settings.yml: {}", e))?;
+
+    let config: LumiConfig =
+        serde_yaml::from_str(&content).map_err(|e| format!("YAML parse error: {}", e))?;
+
+    let server_info = ServerInfo {
+        motd: config.general.motd,
+        server_port: config.general.server_port,
+        max_players: config.general.max_players,
+        core_jar: String::new(),
+    };
+
+    if jar_files.len() == 1 {
+        let mut chosen = server_info.clone();
+        chosen.core_jar = jar_files[0].clone();
+        return Ok(ScanResult::Valid {
+            config: chosen,
+            jars: jar_files,
+        });
+    }
+
+    Ok(ScanResult::NeedCoreSelection {
+        jars: jar_files,
+        config: server_info,
+    })
+}
 
 #[tauri::command]
 async fn check_java_version(required_version_str: String) -> JavaCheckResult {
@@ -80,123 +227,103 @@ async fn check_java_version(required_version_str: String) -> JavaCheckResult {
     result
 }
 
-#[derive(serde::Deserialize, Debug)]
-struct GeneralSettings {
-    motd: String,
-    #[serde(rename = "server-port")]
-    server_port: u16,
-    #[serde(rename = "max-players")]
-    max_players: u32,
-}
-
-#[derive(serde::Deserialize, Debug)]
-struct LumiConfig {
-    general: GeneralSettings,
-}
-
-#[derive(serde::Serialize, Default, Clone)]
-struct ServerInfo {
-    motd: String,
-    server_port: u16,
-    max_players: u32,
-    core_jar: String,
-}
-
-#[derive(serde::Serialize)]
-#[serde(tag = "status", content = "data")]
-#[allow(dead_code)]
-enum ScanResult {
-    Valid {
-        config: ServerInfo,
-        jars: Vec<String>,
-    },
-    NoSettings,
-    NoJars,
-    NeedCoreSelection {
-        jars: Vec<String>,
-        config: ServerInfo,
-    },
-}
-
 #[tauri::command]
 async fn scan_server_folder(server_path: String) -> Result<ScanResult, String> {
-    let path = Path::new(&server_path);
-
-    let mut jar_files: Vec<String> = Vec::new();
-
-    if !path.exists() {
-        return Ok(ScanResult::NoSettings);
-    }
-
-    let entries = fs::read_dir(path).map_err(|e| format!("Read dir error: {}", e))?;
-    for entry in entries.flatten() {
-        let p = entry.path();
-        if p.is_file() {
-            if let Some(ext) = p.extension().and_then(|s| s.to_str()) {
-                if ext.eq_ignore_ascii_case("jar") {
-                    if let Some(name) = p.file_name().and_then(|n| n.to_str()) {
-                        jar_files.push(name.to_string());
-                    }
-                }
-            }
-        }
-    }
-
-    if jar_files.is_empty() {
-        return Ok(ScanResult::NoJars);
-    }
-
-    let settings_path = path.join("settings.yml");
-
-    if !settings_path.exists() {
-        return Ok(ScanResult::NoSettings);
-    }
-
-    let content = fs::read_to_string(&settings_path)
-        .map_err(|e| format!("Failed to read settings.yml: {}", e))?;
-
-    let config: LumiConfig =
-        serde_yaml::from_str(&content).map_err(|e| format!("YAML parse error: {}", e))?;
-
-    let server_info = ServerInfo {
-        motd: config.general.motd,
-        server_port: config.general.server_port,
-        max_players: config.general.max_players,
-        core_jar: String::new(),
-    };
-
-    if jar_files.len() == 1 {
-        let mut chosen = server_info.clone();
-        chosen.core_jar = jar_files[0].clone();
-        return Ok(ScanResult::Valid {
-            config: chosen,
-            jars: jar_files,
-        });
-    }
-
-    Ok(ScanResult::NeedCoreSelection {
-        jars: jar_files,
-        config: server_info,
-    })
+    scan_server_folder_internal(&server_path)
 }
 
 #[tauri::command]
 async fn check_server_status(server_path: String) -> String {
-    let path = Path::new(&server_path).join("players").join("LOCK");
+    check_server_status_internal(&server_path)
+}
 
-    if !path.exists() {
-        return "unknown".to_string();
-    }
+#[tauri::command]
+async fn scan_and_check_servers(servers: Vec<SavedServer>) -> Vec<ServerResponse> {
+    servers
+        .into_par_iter()
+        .map(|saved| {
+            let scan_result = scan_server_folder_internal(&saved.path);
 
-    let file = match OpenOptions::new().write(true).open(&path) {
-        Ok(f) => f,
-        Err(_) => return "unknown".to_string(),
-    };
+            let mut response_settings = ResponseSettings {
+                motd: "".to_string(),
+                server_port: 0,
+                max_players: 0,
+            };
 
-    match file.try_lock_exclusive() {
-        Ok(_) => "offline".to_string(),
-        Err(_) => "online".to_string(),
-    }
+            match scan_result {
+                Ok(res) => match res {
+                    ScanResult::NoSettings => ServerResponse {
+                        id: saved.id,
+                        name: saved.name,
+                        path: saved.path,
+                        status: "error".to_string(),
+                        core_jar: saved.core_jar,
+                        settings: response_settings,
+                        error_message: Some("Settings missing".to_string()),
+                    },
+                    ScanResult::NoJars => ServerResponse {
+                        id: saved.id,
+                        name: saved.name,
+                        path: saved.path,
+                        status: "error".to_string(),
+                        core_jar: saved.core_jar,
+                        settings: response_settings,
+                        error_message: Some("No jars found".to_string()),
+                    },
+                    ScanResult::Valid { config, jars }
+                    | ScanResult::NeedCoreSelection { config, jars } => {
+                        response_settings = ResponseSettings {
+                            motd: config.motd,
+                            server_port: config.server_port,
+                            max_players: config.max_players,
+                        };
+
+                        let effective_core = if !saved.core_jar.is_empty() {
+                            saved.core_jar.clone()
+                        } else {
+                            "core.jar".to_string()
+                        };
+
+                        if !jars.contains(&effective_core) {
+                            return ServerResponse {
+                                id: saved.id,
+                                name: saved.name,
+                                path: saved.path,
+                                status: "error".to_string(),
+                                core_jar: effective_core.clone(),
+                                settings: response_settings,
+                                error_message: Some(format!(
+                                    "Core file '{}' not found",
+                                    effective_core
+                                )),
+                            };
+                        }
+
+                        let status = check_server_status_internal(&saved.path);
+
+                        ServerResponse {
+                            id: saved.id,
+                            name: saved.name,
+                            path: saved.path,
+                            status,
+                            core_jar: effective_core,
+                            settings: response_settings,
+                            error_message: None,
+                        }
+                    }
+                },
+                Err(e) => ServerResponse {
+                    id: saved.id,
+                    name: saved.name,
+                    path: saved.path,
+                    status: "error".to_string(),
+                    core_jar: saved.core_jar,
+                    settings: response_settings,
+                    error_message: Some(e),
+                },
+            }
+        })
+        .collect()
 }
 
 #[tauri::command]
@@ -308,7 +435,8 @@ pub fn run() {
             scan_server_folder,
             check_server_status,
             launch_server_terminal,
-            stop_server
+            stop_server,
+            scan_and_check_servers
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
