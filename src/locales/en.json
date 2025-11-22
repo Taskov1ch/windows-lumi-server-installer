@@ -10,7 +10,11 @@
 		"errors": {
 			"server_exists": "A server with this path already exists",
 			"save_error": "Save Error",
-			"action_failed": "Action Failed"
+			"action_failed": "Action Failed",
+			"settings_missing": "Settings file (settings.yml) not found",
+			"core_missing": "Core file ({{core}}) is missing",
+			"no_jars": "No jar files found in folder",
+			"unknown_error": "Unknown error"
 		},
 		"title": "Lumi Servers Manager",
 		"version": "Version {{version}}",
@@ -92,7 +96,7 @@
 			"label_motd": "MOTD",
 			"label_port": "Port",
 			"label_players": "Players",
-			"edit_server_title": "Edit server",
+			"edit_server_title": "Edit Server",
 			"refresh_server_tooltip": "Refresh List",
 			"start_server": "Start Server",
 			"stop_server": "Stop Server",
@@ -101,7 +105,7 @@
 			"loading": "Loading...",
 			"external": "External",
 			"external_tooltip": "Server running outside launcher (PID unknown)",
-			"confirm_delete": "Confirm Delete",
+			"confirm_delete": "Confirm Deletion",
 			"delete_server": "Delete Server",
 			"status": {
 				"online": "Online",
@@ -152,7 +156,13 @@
 				"action_failed": "Action Failed",
 				"settings_missing": "Settings file (settings.yml) not found",
 				"core_missing": "Core file ({{core}}) is missing",
-				"no_jars": "No jar files found in folder"
+				"no_jars": "No jar files found in folder",
+				"unknown_error": "Unknown error"
+			},
+			"modal_start_error": {
+				"title": "Start Error",
+				"description": "Failed to start the server. Check console or logs for details.",
+				"close": "Close"
 			}
 		},
 		"core_selector": {
